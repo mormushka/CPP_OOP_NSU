@@ -1,7 +1,6 @@
 #ifndef READER_HPP_
 #define READER_HPP_
 
-#include <vector>
 #include <string>
 #include <fstream>
 
@@ -28,19 +27,15 @@ class ReaderCantCloseFileException : std::exception {
 template <typename T>
 class Reader {
  private:
-    //std::string FileName;
-    //std::vector <T> elements;
     std::ifstream in;
     std::string InputFileName_;
+
  public:
     Reader(std::string InputFileName = "input.txt");
     Reader(char *InputFileName = "input.txt");
 
-    //std::vector<T> GetElements();
     template <typename Callback>
     void ProcessElements(Callback callback);
-
-    //void ReadElements();
 
     ~Reader();
 };
@@ -85,31 +80,6 @@ void Reader<std::string>::ProcessElements(Callback callback) {
         callback(str);
     }
 }
-
-/*
-template <typename T>
-std::vector<T> Reader<T>::GetElements() {
-    return elements;
-}
-
-template <>
-void Reader<std::string>::ReadElements() {
-    std::string str;
-    StringHelper::StringHelper &helper = StringHelper::StringHelper::getInstance();
-    while (in >> str) {
-        helper.Parser(str);
-        elements.push_back(str);
-    }
-}
-
-template <typename T>
-void Reader<T>::ReadElements() {
-    T element;
-    while(in >> element) {
-        elements.push_back(element);
-    }
-}
-*/
 
 template <typename T>
 Reader<T>::~Reader() {

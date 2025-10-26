@@ -2,7 +2,6 @@
 #define STRINGHELPER_HPP_
 
 #include <string>
-#include <vector>
 #include <algorithm>
 
 namespace StringHelper

@@ -24,7 +24,10 @@ void WordCounter::Calculate() {
 
     std::sort(calculated_words.begin(), calculated_words.end(),
         [](const StringHelper::WordInformation &a, const StringHelper::WordInformation &b) {
-            return a.count > b.count;
+            if (a.count != b.count) {
+                return a.count > b.count;
+            }
+            return a.word < b.word;
         });
 }
 
