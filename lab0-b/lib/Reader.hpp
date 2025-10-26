@@ -30,6 +30,8 @@ class Reader {
  private:
     std::string FileName;
     std::vector <T> elements;
+    std::ifstream in;
+    std::string InputFileName_;
  public:
     Reader(std::string InputFileName = "input.txt");
     Reader(char *InputFileName = "input.txt");
@@ -39,16 +41,13 @@ class Reader {
     void ReadElements();
 
     ~Reader();
- private:
-    std::ifstream in;
-    std::string InputFileName_;
 };
 
 template <typename T>
-Reader<T>::Reader(std::string InputFileName) {
-    InputFileName_ = InputFileName;
+Reader<T>::Reader(std::string inputFileName) {
+    InputFileName_ = inputFileName;
 
-    in.open(InputFileName);
+    in.open(inputFileName);
     if (!in.is_open()) {
         throw ReaderCantOpenFileException("ERROR: Reader.cpp: Input file " + InputFileName_ + " can't be open\n");
     }
@@ -56,10 +55,10 @@ Reader<T>::Reader(std::string InputFileName) {
 
 
 template <typename T>
-Reader<T>::Reader(char *InputFileName) {
-    InputFileName_ = InputFileName;
+Reader<T>::Reader(char *inputFileName) {
+    InputFileName_ = inputFileName;
 
-    in.open(InputFileName);
+    in.open(inputFileName);
     if (!in.is_open()) {
         throw ReaderCantOpenFileException("ERROR: Reader.cpp: Input file " + InputFileName_ + " can't be open\n");
     }
@@ -73,9 +72,8 @@ std::vector<T> Reader<T>::GetElements() {
 template <>
 void Reader<std::string>::ReadElements() {
     std::string str;
+    StringHelper::StringHelper &helper = StringHelper::StringHelper::getInstance();
     while (in >> str) {
-        StringHelper::StringHelper &helper = StringHelper::StringHelper::getInstance();
-
         helper.Parser(str);
         elements.push_back(str);
     }
