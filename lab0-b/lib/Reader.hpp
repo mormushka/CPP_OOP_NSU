@@ -31,8 +31,8 @@ class Reader {
     std::string InputFileName_;
 
  public:
-    Reader(std::string InputFileName = "input.txt");
-    Reader(char *InputFileName = "input.txt");
+    Reader(std::string inputFileName = "input.txt");
+    Reader(char *inputFileName = "input.txt");
 
     template <typename Callback>
     void ProcessElements(Callback callback);

@@ -34,8 +34,8 @@ class Writer {
     std::string OutputFileName_;
 
  public:
-    Writer(std::string OutputFileName = "out.csv");
-    Writer(char *OutputFileName = "out.csv");
+    Writer(std::string outputFileName = "out.csv");
+    Writer(char *outputFileName = "out.csv");
 
     void Write(std::vector<T> writed_vector);
 
@@ -43,20 +43,20 @@ class Writer {
 };
 
 template <typename T>
-Writer<T>::Writer(std::string OutputFileName) {
-    OutputFileName_ = OutputFileName;
+Writer<T>::Writer(std::string outputFileName) {
+    OutputFileName_ = outputFileName;
 
-    out.open(OutputFileName);
+    out.open(outputFileName);
     if (!out.is_open()) {
         throw WriterCantOpenFileException("ERROR: WordCounter.cpp: Output file " + OutputFileName_ + " can't be open\n");
     }
 }
 
 template <typename T>
-Writer<T>::Writer(char *OutputFileName) {
-    OutputFileName_ = OutputFileName;
+Writer<T>::Writer(char *outputFileName) {
+    OutputFileName_ = outputFileName;
 
-    out.open(OutputFileName);
+    out.open(outputFileName);
     if (!out.is_open()) {
         throw WriterCantOpenFileException("ERROR: WordCounter.cpp: Output file " + OutputFileName_ + " can't be open\n");
     }
