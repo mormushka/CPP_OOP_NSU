@@ -4,27 +4,28 @@ const char* wc_error::what() const noexcept {
     return error_message.c_str();
 }
 
-WordCounter::WordCounter(std::vector<std::string> words) {
-    _words = words;
+void WordCounter::AddWord(const std::string& word) {
+    counter_of_words[word]++;
+    total_words++;
 }
 
 void WordCounter::Calculate() {
-    StringHelper::StringHelper &helper = StringHelper::StringHelper::getInstance();
-
-    for (const auto &word : _words) {
-        counter_of_words[word]++;
+    for (const auto &pair : counter_of_words) {
+        std::string word = pair.first;
+        if (!word.empty()) {
+            word.front() = std::toupper(static_cast<unsigned char>(word.front()));
+        }
+        calculated_words.push_back({
+            word, 
+            pair.second, 
+            static_cast<double>(pair.second) / total_words
+        });
     }
 
-    for (const auto &x : counter_of_words) {
-        std::string word = x.first;
-        word.front() = toupper(static_cast<unsigned char>(word.front()));
-        calculated_words.push_back({word, x.second, x.second / (double)_words.size()});
-    }
-
-    sort(calculated_words.begin(), calculated_words.end(),
-    [](const StringHelper::WordInformation &a, const StringHelper::WordInformation &b) {
-        return a.count > b.count;
-    });
+    std::sort(calculated_words.begin(), calculated_words.end(),
+        [](const StringHelper::WordInformation &a, const StringHelper::WordInformation &b) {
+            return a.count > b.count;
+        });
 }
 
 std::vector<StringHelper::WordInformation> WordCounter::GetCalculatedWords() {

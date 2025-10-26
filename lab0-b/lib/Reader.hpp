@@ -28,17 +28,19 @@ class ReaderCantCloseFileException : std::exception {
 template <typename T>
 class Reader {
  private:
-    std::string FileName;
-    std::vector <T> elements;
+    //std::string FileName;
+    //std::vector <T> elements;
     std::ifstream in;
     std::string InputFileName_;
  public:
     Reader(std::string InputFileName = "input.txt");
     Reader(char *InputFileName = "input.txt");
 
-    std::vector<T> GetElements();
+    //std::vector<T> GetElements();
+    template <typename Callback>
+    void ProcessElements(Callback callback);
 
-    void ReadElements();
+    //void ReadElements();
 
     ~Reader();
 };
@@ -65,6 +67,27 @@ Reader<T>::Reader(char *inputFileName) {
 }
 
 template <typename T>
+template <typename Callback>
+void Reader<T>::ProcessElements(Callback callback) {
+    T element;
+    while(in >> element) {
+        callback(element);
+    }
+}
+
+template <>
+template <typename Callback>
+void Reader<std::string>::ProcessElements(Callback callback) {
+    std::string str;
+    StringHelper::StringHelper &helper = StringHelper::StringHelper::getInstance();
+    while (in >> str) {
+        helper.Parser(str);
+        callback(str);
+    }
+}
+
+/*
+template <typename T>
 std::vector<T> Reader<T>::GetElements() {
     return elements;
 }
@@ -86,6 +109,7 @@ void Reader<T>::ReadElements() {
         elements.push_back(element);
     }
 }
+*/
 
 template <typename T>
 Reader<T>::~Reader() {

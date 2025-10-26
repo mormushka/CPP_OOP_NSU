@@ -1,13 +1,9 @@
 #ifndef WORDCOUNTER_HPP_
 #define WORDCOUNTER_HPP_
 
-#include <iostream>
-#include <string>
-#include <fstream>
 #include <map>
 #include <vector>
-#include <algorithm>
-#include <iomanip>
+#include <string>
 
 #include "StringHelper.hpp"
 
@@ -21,15 +17,15 @@ class wc_error : public std::exception {
 
 class WordCounter {
  public:
-    explicit WordCounter(std::vector<std::string> words);
+    WordCounter() = default;
+    void AddWord(const std::string& word);
     void Calculate();
     std::vector<StringHelper::WordInformation> GetCalculatedWords();
-    ~WordCounter() = default;
 
  private:
-    std::vector<std::string> _words;
     std::map<std::string, size_t> counter_of_words;
     std::vector<StringHelper::WordInformation> calculated_words;
+    size_t total_words = 0;
 };
 
 #endif //WORDCOUNTER_HPP_

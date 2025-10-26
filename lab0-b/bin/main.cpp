@@ -1,5 +1,5 @@
 #include <iostream>
-#include <vector>
+#include <map>
 
 #include "StringHelper.hpp"
 #include "WordCounter.hpp"
@@ -25,10 +25,12 @@ int main(int argc, char* argv[]) {
     StringHelper::StringHelper &helper = StringHelper::StringHelper::getInstance();
 
     Reader<std::string> reader(argv[1]);
-    reader.ReadElements();
-    std::vector<std::string> words = reader.GetElements();
+    WordCounter counter;
+    
+    reader.ProcessElements([&counter](const std::string& word) {
+        counter.AddWord(word);
+    });
 
-    WordCounter counter(words);
     counter.Calculate();
     std::vector <StringHelper::WordInformation> calculated_words = counter.GetCalculatedWords();
 
