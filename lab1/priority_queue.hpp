@@ -171,8 +171,6 @@ private:
 
   void build_heap()
   {
-    if (data_.empty())
-      return;
     for (size_type i = data_.size() / 2; i-- > 0;)
       sift_down(i);
   }
