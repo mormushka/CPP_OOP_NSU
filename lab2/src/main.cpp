@@ -1,30 +1,30 @@
-// main.cpp
-#include "GameEngine.hpp"
+#include "AsteroidsGame.h"
+#include <iostream>
+
+#include "IRenderer.h"
+#include "IInputEvent.h"
+#include "IClock.h"
+#include "IAudioManager.h"
+
+#include "FakeAudioManager.h"
+
+#include "SFMLRenderer.h"
+#include "SFMLInputEvent.h"
+#include "SFMLClock.h"
+#include "SFMLAudioManager.h"
+
 #include "Logger.hpp"
 
-int main() {
-    try {
-        LOG_INFO("========================================");
-        LOG_INFO("     Asteroids Game - Starting Up       ");
-        LOG_INFO("========================================");
-        
-        // Инициализация и запуск игрового движка
-        GameEngine gameEngine;
-        gameEngine.run();
-        
-        LOG_INFO("========================================");
-        LOG_INFO("      Asteroids Game - Shutting Down    ");
-        LOG_INFO("========================================");
-        
-        return 0;
-    } catch (const std::exception& e) {
-        LOG_ERROR("Fatal error in main: " + std::string(e.what()));
-        std::cerr << "Fatal error: " << e.what() << std::endl;
-        
-        #ifdef _WIN32
-            MessageBoxA(nullptr, e.what(), "Asteroids - Fatal Error", MB_ICONERROR | MB_OK);
-        #endif
-        
-        return 1;
-    }
+int main()
+{
+    auto renderer = std::make_shared<SFMLRenderer>();
+    renderer->CreateWindow(800, 800, "Asteroids");
+    renderer->SetFramerateLimit(60);
+
+    auto input = std::make_shared<SFMLInputEvent>(renderer->GetWindow());
+    auto clock = std::make_shared<SFMLClock>();
+    auto audio = std::make_shared<FakeAudioManager>();
+
+    auto game = std::make_shared<AsteroidsGame>(renderer, input, clock, audio);
+    game->run();
 }

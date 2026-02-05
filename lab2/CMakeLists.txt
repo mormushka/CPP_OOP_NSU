@@ -4,25 +4,16 @@ project(Asteroids)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# Укажи путь к SFML
-set(SFML_DIR "C:/Libs/SFML-2.6.2/lib/cmake/SFML")
+# Для Linux используем pkg-config или обычный find_package
+# Убедитесь, что SFML установлен через пакетный менеджер:
+# sudo pacman -S sfml
 
-# Не указываем версию, чтобы принять любую доступную
-find_package(SFML COMPONENTS graphics window system REQUIRED)
+# Ищем SFML через find_package (стандартный способ для Linux)
+find_package(SFML 2.6 COMPONENTS graphics window system audio REQUIRED)
 
 # Список исходных файлов по новой структуре
 set(SOURCE_FILES
     src/main.cpp
-    
-    # Core
-    src/core/GameWorld.cpp
-    src/core/Controller.cpp
-    src/core/GameEngine.cpp
-    
-    # Entities
-    src/entities/Ship.cpp
-    src/entities/Asteroid.cpp
-    src/entities/Bullet.cpp
 )
 
 # Проверяем существование файлов перед добавлением
@@ -37,29 +28,38 @@ add_executable(Asteroids ${SOURCE_FILES})
 # Включаем директории для заголовочных файлов
 target_include_directories(Asteroids PRIVATE 
     ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/include/core
-    ${CMAKE_SOURCE_DIR}/include/entities
-    ${CMAKE_SOURCE_DIR}/include/interfaces
-    ${CMAKE_SOURCE_DIR}/include/utils
-    ${CMAKE_SOURCE_DIR}/include/factories
+    ${CMAKE_SOURCE_DIR}/include/GameEngine/Core
+    ${CMAKE_SOURCE_DIR}/include/GameEngine/Core/SFML
+    ${CMAKE_SOURCE_DIR}/include/GameEngine/Core/FAKE
+    ${CMAKE_SOURCE_DIR}/include/GameEngine/Core/Utils
+    ${CMAKE_SOURCE_DIR}/include/GameEngine/GameObjects
+    ${CMAKE_SOURCE_DIR}/include/GameEngine/GameObjects/Components
+    ${CMAKE_SOURCE_DIR}/include/GameEngine/GameObjects/BehaviourComponents
+    ${CMAKE_SOURCE_DIR}/include/GameEngine/GameObjects/Base
+    ${CMAKE_SOURCE_DIR}/include/GameEngine/UI
+    ${CMAKE_SOURCE_DIR}/include/Game
+    ${CMAKE_SOURCE_DIR}/include/Game/Scenes
+    ${CMAKE_SOURCE_DIR}/include/Game/GameEvents
+    ${CMAKE_SOURCE_DIR}/include/Game/Assets
+    ${CMAKE_SOURCE_DIR}/include/Game/Assets/Scripts
+    ${CMAKE_SOURCE_DIR}/include/Game/Assets/Player
+    ${CMAKE_SOURCE_DIR}/include/Game/Assets/Asteroids
+    ${CMAKE_SOURCE_DIR}/include/Game/Assets/Bullet
 )
 
-target_link_libraries(Asteroids sfml-graphics sfml-window sfml-system)
-
-# --- автокопирование DLL ---
-# где лежат DLL
-set(SFML_DLL_DIR "C:/Libs/SFML-2.6.2/bin")
-
-file(GLOB SFML_DLLS "${SFML_DLL_DIR}/*.dll") 
-
-add_custom_command(TARGET Asteroids POST_BUILD 
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-    ${SFML_DLLS} 
-    $<TARGET_FILE_DIR:Asteroids> 
-    COMMENT "Copying all SFML DLLs..." 
+# Подключаем SFML библиотеки
+target_link_libraries(Asteroids 
+    sfml-graphics
+    sfml-window
+    sfml-system
+    sfml-audio
 )
 
-# --- автокопирование ресурсов ---
+# В Linux обычно не нужно копировать DLL, так как библиотеки находятся в системных путях
+# Но если вы хотите использовать динамические библиотеки из нестандартного пути,
+# можно оставить копирование .so файлов (но обычно в этом нет необходимости)
+
+# --- автокопирование ресурсов (остается таким же для Linux) ---
 # Копируем всю структуру ресурсов рекурсивно
 add_custom_command(TARGET Asteroids POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
