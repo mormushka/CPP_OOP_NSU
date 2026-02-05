@@ -202,6 +202,7 @@ public:
     void OnGameShutdown()
     {
         gameState_ = kShutdown;
+        score_ = 0;
         for (auto &obj : objects_)
         {
             obj->Destroy();
