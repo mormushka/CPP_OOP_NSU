@@ -16,7 +16,7 @@ public:
     Transform(const Vector2 &position, float rotation)
         : position_(position), rotation_(rotation) {}
 
-    Vector2 LocalPosition() const { return position_; }
+    Vector2 GetLocalPosition() const { return position_; }
     void SetLocalPosition(const Vector2 &position) { position_ = position; }
 
     Vector2 WorldPosition() const
@@ -54,7 +54,6 @@ public:
     void Translate(const Vector2 &translation) { position_ += translation; }
     void Translate(float x, float y) { position_ += Vector2(x, y); }
 
-    // Масштаб
     void SetScale(const Vector2 &scale) { scale_ = scale; }
     void SetScale(float x, float y) { scale_ = Vector2(x, y); }
     void SetScale(float uniformScale) { scale_ = Vector2(uniformScale, uniformScale); }
@@ -86,7 +85,6 @@ public:
         return worldScale;
     }
 
-    // Поворот
     void SetRotation(float rotation) { rotation_ = rotation; }
     float Rotation() const { return rotation_; }
     void Rotate(float angle) { rotation_ += angle; }
@@ -101,15 +99,11 @@ public:
 
         while (currentParent)
         {
-            if (auto parentTransform = currentParent->GetComponent<Transform>())
-            {
-                worldRotation += parentTransform->Rotation();
-                currentParent = currentParent->Parent().lock();
-            }
-            else
-            {
+            auto parentTransform = currentParent->GetComponent<Transform>();
+            if (!parentTransform)
                 break;
-            }
+            worldRotation += parentTransform->Rotation();
+            currentParent = currentParent->Parent().lock();
         }
 
         return worldRotation;
@@ -173,15 +167,11 @@ public:
         auto currentParent = Owner().lock() ? Owner().lock()->Parent().lock() : nullptr;
         while (currentParent)
         {
-            if (auto parentTransform = currentParent->GetComponent<Transform>())
-            {
-                result = parentTransform->TransformPoint(result);
-                currentParent = currentParent->Parent().lock();
-            }
-            else
-            {
+            auto parentTransform = currentParent->GetComponent<Transform>();
+            if (!parentTransform)
                 break;
-            }
+            result = parentTransform->TransformPoint(result);
+            currentParent = currentParent->Parent().lock();
         }
 
         return result;

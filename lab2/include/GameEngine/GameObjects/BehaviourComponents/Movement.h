@@ -64,11 +64,11 @@ public:
         auto transform = Owner().lock()->GetComponent<Transform>();
         if (transform && collisionEnabled_)
         {
-            lastSafePosition_ = transform->LocalPosition();
+            lastSafePosition_ = transform->GetLocalPosition();
         }
         if (transform)
         {
-            Vector2 newPos = transform->LocalPosition() + velocity_ * deltaTime;
+            Vector2 newPos = transform->GetLocalPosition() + velocity_ * deltaTime;
             transform->SetLocalPosition(newPos);
         }
     }

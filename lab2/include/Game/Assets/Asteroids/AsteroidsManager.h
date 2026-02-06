@@ -87,10 +87,10 @@ public:
 
             asteroids_[a1]
                 ->GetComponent<Transform>()
-                ->SetLocalPosition(asteroids_[i]->GetComponent<Transform>()->LocalPosition());
+                ->SetLocalPosition(asteroids_[i]->GetComponent<Transform>()->GetLocalPosition());
             asteroids_[a2]
                 ->GetComponent<Transform>()
-                ->SetLocalPosition(asteroids_[i]->GetComponent<Transform>()->LocalPosition());
+                ->SetLocalPosition(asteroids_[i]->GetComponent<Transform>()->GetLocalPosition());
             asteroids_[a1]
                 ->GetComponent<Movement>()
                 ->SetVelocity(asteroids_[i]->GetComponent<Movement>()->Velocity() + Vector2(rand() % 400 - 200, rand() % 400 - 200));

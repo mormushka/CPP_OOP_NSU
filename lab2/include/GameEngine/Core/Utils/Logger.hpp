@@ -3,14 +3,12 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <mutex>
 #include <memory>
 #include <ctime>
 #include <iomanip>
 
 #define LOG_ON
 
-// Уровни логирования
 enum class LogLevel
 {
     Debug,
@@ -30,7 +28,6 @@ public:
 
     void SetLogFile(const std::string &filename)
     {
-        std::lock_guard<std::mutex> lock(mutex_);
         fileStream_.open(filename, std::ios::out | std::ios::app);
     }
 
@@ -39,10 +36,8 @@ public:
         logLevel_ = level;
     }
 
-    // Основной метод для записи сообщения
     void Write(LogLevel level, const std::string &message)
     {
-        std::lock_guard<std::mutex> lock(mutex_);
         if (level >= logLevel_)
         {
             std::ostringstream oss;
@@ -55,12 +50,11 @@ public:
             if (fileStream_.is_open())
             {
                 fileStream_ << out;
-                fileStream_.flush(); // Гарантируем запись
+                fileStream_.flush();
             }
         }
     }
 
-    // Stream-подобный интерфейс для удобства
     class LogStream
     {
     public:
@@ -84,7 +78,6 @@ public:
             return *this;
         }
         
-        // Специальная перегрузка для манипуляторов типа std::endl
         LogStream &operator<<(std::ostream &(*manip)(std::ostream &))
         {
             buffer_ << manip;
@@ -145,11 +138,9 @@ private:
 
     LogLevel logLevel_;
     std::ofstream fileStream_;
-    std::mutex mutex_;
 };
 
 #ifdef LOG_ON
-// Макросы для удобного вызова
 #define LOG_DEBUG Logger::Instance().Stream(LogLevel::Debug)
 #define LOG_INFO Logger::Instance().Stream(LogLevel::Info)
 #define LOG_WARN Logger::Instance().Stream(LogLevel::Warning)

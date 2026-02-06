@@ -21,14 +21,12 @@ public:
     virtual ~Observer() = default;
     virtual void OnNotify(const T &event) = 0;
     
-    // Удобный метод для получения weak_ptr
     std::weak_ptr<Observer<T>> getWeakPtr()
     {
         return this->shared_from_this();
     }
 };
 
-// Наблюдаемый объект
 template <typename T>
 class Subject
 {
@@ -51,7 +49,7 @@ public:
     void RemoveObserver(std::weak_ptr<Observer<T>> observer)
     {
         auto target = observer.lock();
-        if (!target) return; // Указатель уже невалиден
+        if (!target) return;
         
         observers.erase(
             std::remove_if(observers.begin(), observers.end(),
@@ -70,11 +68,10 @@ public:
 
     void RefreshObservers()
     {
-        // Удаляем всех несуществующих наблюдателей
         observers.erase(
             std::remove_if(observers.begin(), observers.end(),
                 [](const std::weak_ptr<Observer<T>>& weakObs) {
-                    return weakObs.expired(); // Проверяем истек ли weak_ptr
+                    return weakObs.expired();
                 }),
             observers.end()
         );
@@ -83,10 +80,8 @@ public:
 protected:
     void Notify(const T &event)
     {
-        // Обновляем список перед уведомлением
-        //RefreshObservers();
-        
-        // Создаем копию weak_ptr для безопасности
+        RefreshObservers();
+
         auto observersCopy = observers;
         
         for (auto& weakObserver : observersCopy)
@@ -97,8 +92,7 @@ protected:
                 observer->OnNotify(event);
             }
         }
-        
-        // После уведомления можно снова очистить невалидные
-        //RefreshObservers();
+
+        RefreshObservers();
     }
 };

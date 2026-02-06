@@ -215,7 +215,7 @@ public:
             float rotation = transform->Rotation() - 90.f;
             float rad = rotation * 3.14159f / 180.0f;
             Vector2 direction(std::cos(rad), std::sin(rad));
-            Vector2 spawnPosition = transform->LocalPosition() + direction * 20.0f;
+            Vector2 spawnPosition = transform->GetLocalPosition() + direction * 20.0f;
 
             GameEvents::Shoot shootEvent;
             shootEvent.position = spawnPosition;

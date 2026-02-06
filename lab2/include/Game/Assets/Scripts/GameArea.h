@@ -43,20 +43,20 @@ public:
         for (const auto &a : asteroids_)
         {
             t = a->GetComponent<Transform>();
-            newPos = t->LocalPosition();
-            if (t->LocalPosition().x > asteroidZone_.x)
+            newPos = t->GetLocalPosition();
+            if (t->GetLocalPosition().x > asteroidZone_.x)
             {
                 newPos.x = -asteroidBorder_;
             }
-            else if (t->LocalPosition().x < -asteroidBorder_)
+            else if (t->GetLocalPosition().x < -asteroidBorder_)
             {
                 newPos.x = asteroidZone_.x;
             }
-            if (t->LocalPosition().y > asteroidZone_.y)
+            if (t->GetLocalPosition().y > asteroidZone_.y)
             {
                 newPos.y = -asteroidBorder_;
             }
-            else if (t->LocalPosition().y < -asteroidBorder_)
+            else if (t->GetLocalPosition().y < -asteroidBorder_)
             {
                 newPos.y = asteroidZone_.y;
             }
@@ -65,20 +65,20 @@ public:
         }
 
         t = player_->GetComponent<Transform>();
-        newPos = t->LocalPosition();
-        if (t->LocalPosition().x > playerZone_.x)
+        newPos = t->GetLocalPosition();
+        if (t->GetLocalPosition().x > playerZone_.x)
         {
             newPos.x = -playerBorder_;
         }
-        else if (t->LocalPosition().x < -playerBorder_)
+        else if (t->GetLocalPosition().x < -playerBorder_)
         {
             newPos.x = playerZone_.x;
         }
-        if (t->LocalPosition().y > playerZone_.y)
+        if (t->GetLocalPosition().y > playerZone_.y)
         {
             newPos.y = -playerBorder_;
         }
-        else if (t->LocalPosition().y < -playerBorder_)
+        else if (t->GetLocalPosition().y < -playerBorder_)
         {
             newPos.y = playerZone_.y;
         }

@@ -32,21 +32,21 @@ public:
 
     const std::string &GetId() const { return id_; }
 
-    void CalculateAbsoluteCoords(int screenWidth, int screenHeight)
+    void CalculateAbsoluteCoords(const Vector2& screenSize)
     {
-        absolutePosition_.x = relativePosition_.x * screenWidth;
-        absolutePosition_.y = relativePosition_.y * screenHeight;
-        absoluteSize_.x = relativeSize_.x * screenWidth;
-        absoluteSize_.y = relativeSize_.y * screenHeight;
+        absolutePosition_.x = relativePosition_.x * screenSize.x;
+        absolutePosition_.y = relativePosition_.y * screenSize.y;
+        absoluteSize_.x = relativeSize_.x * screenSize.x;
+        absoluteSize_.y = relativeSize_.y * screenSize.y;
     }
 
     virtual void Render(IRenderer &renderer)
     {
         if (!isVisible_)
             return;
-        Color bg = isPressed_ ? UIConfig::BUTTON_PRESSED_COLOR : isHovered_ ? UIConfig::BUTTON_HOVER_COLOR
+        Color bg = isPressed_ ? UIConfig::PRESSED_COLOR : isHovered_ ? UIConfig::HOVER_COLOR
                                                                             : backgroundColor_;
-        renderer.DrawRectangle(absolutePosition_, absoluteSize_, bg, 2.0f);
+        renderer.DrawRectangle(absolutePosition_, absoluteSize_, bg, UIConfig::THUMB_BORDER_RADIUS);
     }
 
     virtual bool IsPointInside(const Vector2 &p) const

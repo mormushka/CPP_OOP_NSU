@@ -36,7 +36,7 @@ public:
         const Vector2 &pos = GetAbsolutePos();
         const Vector2 &size = GetAbsoluteSize();
 
-        float trackHeight = size.y * 0.2f;
+        float trackHeight = size.y * UIConfig::SLIDER_TRACK_HEIGHT_RATIO;
         Vector2 trackPos = {pos.x, pos.y + (size.y - trackHeight) / 2.0f};
         Vector2 trackSize = {size.x, trackHeight};
 
@@ -62,11 +62,11 @@ public:
         else if (isHovered_)
             thumbColor = thumbHoverColor_;
 
-        renderer.DrawRectangle(thumbPos, thumbSize, thumbColor, 2.0f);
+        renderer.DrawRectangle(thumbPos, thumbSize, thumbColor, UIConfig::SLIDER_THUMB_BORDER_RADIUS);
 
         if (!GetText().empty() && fontPath_ != "")
         {
-            Vector2 textPos = {pos.x + size.x + 10.0f, pos.y + size.y / 2.0f};
+            Vector2 textPos = {pos.x + size.x + UIConfig::SLIDER_TEXT_OFFSET, pos.y + size.y / 2.0f};
             std::string valueText = GetText() + ": " + std::to_string(static_cast<int>(currentValue_ * 100.f));
             renderer.DrawText(valueText, fontPath_, textPos, fontSize_, GetTextColor(), false);
         }

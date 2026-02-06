@@ -24,7 +24,7 @@ protected:
     std::vector<std::shared_ptr<GameObject>> objects_;
 
 public:
-    GameScene(std::string sceneName,
+    GameScene(std::string &sceneName,
               std::shared_ptr<IRenderer> r,
               std::shared_ptr<IAudioManager> a,
               std::shared_ptr<UIManager> u,

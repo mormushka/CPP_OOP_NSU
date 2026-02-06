@@ -74,17 +74,13 @@ public:
 
     void UpdateLayout(IRenderer &renderer)
     {
-        int w, h;
-        renderer.GetWindowSize(w, h);
+        Vector2 windowSize = renderer.GetWindowSize();
         for (auto &[id, element] : sceneElements_[activeScene_])
-        {
-            element->CalculateAbsoluteCoords(w, h);
-        }
+            element->CalculateAbsoluteCoords(windowSize);
     }
 
     void Update(float deltaTime)
     {
-        // Обновление анимаций или других эффектов
     }
 
     void Render(IRenderer &renderer)
@@ -125,8 +121,6 @@ public:
             break;
         }
     }
-
-
 
 private:
     void HandleMouseMove(const Vector2 &mousePos)

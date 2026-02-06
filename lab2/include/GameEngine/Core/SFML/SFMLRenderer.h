@@ -22,13 +22,12 @@ public:
     {
         window.clear(sf::Color(color.r, color.g, color.b, color.a));
     }
+    
     void Display() override { window.display(); }
 
-    void GetWindowSize(int &width, int &height) const override
+    Vector2 GetWindowSize() const override
     {
-        sf::Vector2u size = window.getSize();
-        width = size.x;
-        height = size.y;
+        return Vector2(window.getSize().x, window.getSize().y);
     }
 
     void SetFramerateLimit(unsigned int fps) override { window.setFramerateLimit(fps); }
@@ -65,6 +64,7 @@ public:
         sf::RectangleShape rect(sf::Vector2f(size.x, size.y));
         rect.setPosition(pos.x, pos.y);
         rect.setFillColor(sf::Color(color.r, color.g, color.b, color.a));
+
         if (outlineThickness > 0.0f)
         {
             rect.setOutlineColor(sf::Color::White);
@@ -90,7 +90,6 @@ public:
         window.draw(convex);
     }
 
-    // const std::vector<sf::Vector2f> &points, const sf::Color &col = sf::Color::White
     void DrawConvex(const Vector2 &pos,
                     const Vector2 &scale,
                     const float &rotation,

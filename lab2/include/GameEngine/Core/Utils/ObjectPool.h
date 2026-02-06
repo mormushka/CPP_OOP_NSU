@@ -23,22 +23,19 @@ public:
             pool.push_back(std::make_unique<T>());
     }
 
-    /// Получить свободный объект из пула
     template <typename InitFunc>
     T *Acquire(InitFunc initializer)
     {
-        // ищем свободный объект
         for (auto &obj : pool)
         {
             if (!IsActive(obj.get()))
             {
-                initializer(*obj); // инициализация
+                initializer(*obj);
                 active.push_back(obj.get());
                 return obj.get();
             }
         }
 
-        // если свободных нет — расширяем пул
         if (pool.size() < maxSize)
         {
             pool.push_back(std::make_unique<T>());
@@ -52,13 +49,11 @@ public:
         return nullptr;
     }
 
-    /// Освободить объект (снять с активных)
     void Release(T *obj)
     {
         active.erase(std::remove(active.begin(), active.end(), obj), active.end());
     }
 
-    /// Обновить список активных (например, удалить остановленные)
     template <typename Predicate>
     void Update(Predicate isInactive)
     {

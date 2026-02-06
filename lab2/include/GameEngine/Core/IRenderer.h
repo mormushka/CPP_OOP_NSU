@@ -116,7 +116,7 @@ public:
     virtual void Close() = 0;
     virtual void Clear(const Color &color = Color(0, 0, 0, 255)) = 0;
     virtual void Display() = 0;
-    virtual void GetWindowSize(int &width, int &height) const = 0;
+    virtual Vector2 GetWindowSize() const = 0;
 
     virtual void SetFramerateLimit(unsigned int fps) = 0;
 
