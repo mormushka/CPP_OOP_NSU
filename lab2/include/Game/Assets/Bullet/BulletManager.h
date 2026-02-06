@@ -12,11 +12,10 @@ class BulletManager : public Observer<Event>
 private:
     std::vector<std::shared_ptr<Bullet>> bullets_;
     std::vector<std::shared_ptr<Bullet>> bulletPool_;
-    std::weak_ptr<IRenderer> renderer_;
     const int maxPoolSize_ = 40;
 
 public:
-    BulletManager(std::shared_ptr<IRenderer> renderer) : renderer_(renderer)
+    BulletManager(std::shared_ptr<IRenderer> renderer)
     {
         for (int i = 0; i < maxPoolSize_; ++i)
         {
