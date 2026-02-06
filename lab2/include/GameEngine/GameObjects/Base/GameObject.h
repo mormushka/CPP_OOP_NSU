@@ -16,7 +16,7 @@ private:
     bool isStarted_ = false;
 
     std::unordered_map<std::type_index, std::shared_ptr<Component>> components_;
-    std::vector<BehaviourComponent *> behaviourComponents_;
+    std::vector<std::shared_ptr<BehaviourComponent>> behaviourComponents_;
     std::vector<std::shared_ptr<GameObject>> childrens_;
     std::weak_ptr<GameObject> parent_;
 
@@ -27,35 +27,40 @@ public:
     virtual void Initialize() {};
 
     template <typename T, typename... Args>
-    T *AddComponent(Args &&...args)
-    {
-        auto typeIdx = std::type_index(typeid(T));
-        if (components_.find(typeIdx) != components_.end())
-        {
-            return static_cast<T *>(components_[typeIdx].get());
-        }
-
-        auto component = std::make_unique<T>(std::forward<Args>(args)...);
-        T *rawPtr = component.get();
-        components_[typeIdx] = std::move(component);
-
-        if (auto self = weak_from_this().lock())
-        {
-            rawPtr->SetOwner(self);
-        }
-
-        if (auto behaviourComponent = dynamic_cast<BehaviourComponent *>(rawPtr))
-            behaviourComponents_.push_back(behaviourComponent);
-
-        return rawPtr;
-    }
-
-    template <typename T>
-    T *GetComponent()
+    std::shared_ptr<T> AddComponent(Args &&...args)
     {
         auto typeIdx = std::type_index(typeid(T));
         auto it = components_.find(typeIdx);
-        return (it != components_.end()) ? static_cast<T *>(it->second.get()) : nullptr;
+        if (it != components_.end())
+        {
+            return std::dynamic_pointer_cast<T>(it->second);
+        }
+
+        auto component = std::make_shared<T>(std::forward<Args>(args)...);
+        components_[typeIdx] = component;
+
+        component->SetOwner(weak_from_this());
+
+        if (auto behaviourComponent = std::dynamic_pointer_cast<BehaviourComponent>(component))
+        {
+            behaviourComponents_.push_back(behaviourComponent);
+        }
+
+        return component;
+    }
+
+    template <typename T>
+    std::shared_ptr<T> GetComponent()
+    {
+        auto typeIdx = std::type_index(typeid(T));
+        auto it = components_.find(typeIdx);
+
+        if (it != components_.end() && it->second)
+        {
+            return std::dynamic_pointer_cast<T>(it->second);
+        }
+
+        return nullptr;
     }
 
     template <typename T>

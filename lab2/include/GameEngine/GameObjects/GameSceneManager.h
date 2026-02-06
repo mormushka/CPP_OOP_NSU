@@ -10,7 +10,7 @@ class GameSceneManager : public BehaviourComponent
 {
 private:
     std::unordered_map<std::string, std::shared_ptr<GameScene>> scenes_;
-    GameScene *currentScene_ = nullptr;
+    std::shared_ptr<GameScene> currentScene_;
 
 public:
     void Awake() override
@@ -47,7 +47,7 @@ public:
         LOG_INFO << "Added Scene: " << name;
     }
 
-    GameScene *GetCurrentScene() const
+    std::shared_ptr<GameScene> GetCurrentScene() const
     {
         return currentScene_;
     }
@@ -62,7 +62,7 @@ public:
         auto it = scenes_.find(name);
         if (it != scenes_.end())
         {
-            currentScene_ = it->second.get();
+            currentScene_ = it->second;
         }
     }
 

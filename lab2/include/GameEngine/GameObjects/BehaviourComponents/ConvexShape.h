@@ -9,7 +9,7 @@ private:
     Convex convex_;
     Convex convexMutable_;
     std::weak_ptr<IRenderer> renderer_;
-    Transform *transform_;
+    std::shared_ptr<Transform> transform_;
     bool isVisible_ = true;
 
 public:

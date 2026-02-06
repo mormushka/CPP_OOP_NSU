@@ -10,8 +10,8 @@ class BulletController : public BehaviourComponent
 private:
     float lifeTime_ = 0.0f;
     const float maxLifeTime_ = 1.0f;
-    Transform* transform_ = nullptr;
-    Movement* movement_ = nullptr;
+    std::shared_ptr<Transform> transform_ = nullptr;
+    std::shared_ptr<Movement> movement_ = nullptr;
     
 public:
     BulletController() = default;

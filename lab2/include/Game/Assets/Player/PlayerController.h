@@ -29,9 +29,9 @@ private:
     const float kStunDuration_ = 4.0f;
     float animTimer_ = 0.0f;
     const float kAnimDuration_ = 0.2f;
-    Movement *movement;
-    Transform *transform;
-    ConvexShape *convexShape;
+    std::shared_ptr<Movement> movement;
+    std::shared_ptr<Transform> transform;
+    std::shared_ptr<ConvexShape> convexShape;
 
     float shootCooldown_ = 0.0f;
     const float kShootCooldown_ = 0.3f;

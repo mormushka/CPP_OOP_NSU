@@ -10,8 +10,8 @@ struct CollisionInfo
 {
     std::shared_ptr<GameObject> objectA;
     std::shared_ptr<GameObject> objectB;
-    CircleCollider *colliderA;
-    CircleCollider *colliderB;
+    std::shared_ptr<CircleCollider> colliderA;
+    std::shared_ptr<CircleCollider> colliderB;
     Vector2 normal;
     float depth = 0.0f;
     Vector2 contactPoint;
@@ -142,7 +142,7 @@ private:
 
         if (movementA && movementB)
         {
-            ResolvePhysicsCollision(info, movementA, movementB);
+            ResolvePhysicsCollision(info);
         }
         else if (movementA)
         {
@@ -161,9 +161,12 @@ private:
         info.objectB->OnCollisionEnter(info.objectA);
     }
 
-    void ResolvePhysicsCollision(const CollisionInfo &info, Movement *movementA, Movement *movementB)
+    void ResolvePhysicsCollision(const CollisionInfo &info)
     {
         float restitution = 0.8f;
+
+        auto movementA = info.objectA->GetComponent<Movement>();
+        auto movementB = info.objectB->GetComponent<Movement>();
 
         Vector2 velocityA = movementA->Velocity();
         Vector2 velocityB = movementB->Velocity();

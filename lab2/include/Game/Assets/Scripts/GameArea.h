@@ -38,7 +38,7 @@ public:
 
     void Check(float deltaTime)
     {
-        Transform *t;
+        std::shared_ptr<Transform> t;
         Vector2 newPos;
         for (const auto &a : asteroids_)
         {

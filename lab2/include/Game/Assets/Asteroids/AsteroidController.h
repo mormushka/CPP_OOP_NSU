@@ -14,7 +14,7 @@ private:
     int index_;
     float rotationSpeed_ = 20.f;
     int speedRandMut_ = 200;
-    Transform *transform;
+    std::shared_ptr<Transform> transform_;
 
 public:
     enum AsteroidState
@@ -36,14 +36,14 @@ public:
         if (!Owner().lock())
             return;
 
-        transform = Owner().lock()->GetComponent<Transform>();
+        transform_ = Owner().lock()->GetComponent<Transform>();
     }
 
     void Start() override {}
 
     void Update(float deltaTime) override
     {
-        transform->SetRotation(transform->Rotation() + rotationSpeed_ * deltaTime);
+        transform_->SetRotation(transform_->Rotation() + rotationSpeed_ * deltaTime);
     }
 
     void TakeDamage()

@@ -13,5 +13,6 @@ public:
     virtual ~Component() = default;
 
     void SetOwner(std::shared_ptr<GameObject> owner) { owner_ = owner; }
+    void SetOwner(std::weak_ptr<GameObject> owner) { owner_ = owner; }
     std::weak_ptr<GameObject> Owner() const { return owner_; }
 };
