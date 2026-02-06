@@ -39,13 +39,11 @@ public:
     {
         ui_->HandleEvent(event);
 
-        if (event.type == IInputEvent::IEvent::Type::KeyPressed)
+        if (event.type == IInputEvent::IEvent::Type::KeyPressed &&
+            event.keyCode == IInputEvent::IEvent::KeyCode::P)
         {
-            if (event.keyCode == IInputEvent::IEvent::KeyCode::P)
-            {
-                GameEvents::SceneChange sceneEvent("Game");
-                Notify(sceneEvent);
-            }
+            GameEvents::SceneChange sceneEvent("Game");
+            Notify(sceneEvent);
         }
     }
 

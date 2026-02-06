@@ -28,18 +28,7 @@ public:
         }
         else if (auto *sliderEvent = dynamic_cast<const UIEvents::SliderValueChanged *>(&event))
         {
-            if (sliderEvent->elementId == "master_volume")
-            {
-                audio_->SetMasterVolume(sliderEvent->value * 100.f);
-            }
-            if (sliderEvent->elementId == "music_volume")
-            {
-                audio_->SetMusicVolume(sliderEvent->value * 100.f);
-            }
-            if (sliderEvent->elementId == "effects_volume")
-            {
-                audio_->SetEffectsVolume(sliderEvent->value * 100.f);
-            }
+            ChangeVolume(*sliderEvent);
         }
         Notify(event);
     }
@@ -67,11 +56,13 @@ public:
         UI_BUTTON("btn_exit_menu", 0.3f, 0.8f, 0.4f, 0.1f, "EXIT");
     }
 
-    void Update(float deltaTime) override
+    void ChangeVolume(const UIEvents::SliderValueChanged &sliderEvent)
     {
-    }
-
-    void Render() override
-    {
+        if (sliderEvent.elementId == "master_volume")
+            audio_->SetMasterVolume(sliderEvent.value * 100.f);
+        if (sliderEvent.elementId == "music_volume")
+            audio_->SetMusicVolume(sliderEvent.value * 100.f);
+        if (sliderEvent.elementId == "effects_volume")
+            audio_->SetEffectsVolume(sliderEvent.value * 100.f);
     }
 };
