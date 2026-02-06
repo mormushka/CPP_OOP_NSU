@@ -64,7 +64,7 @@ public:
     
     void Start() override
     {
-        auto *label = UI_LABEL("game_over_txt", 0.2f, 0.1f, 0.1f, 0.1f, "GAME OVER");
+        auto label = UI_LABEL("game_over_txt", 0.2f, 0.1f, 0.1f, 0.1f, "GAME OVER");
         label->SetTextColor(Colors::kRedCatp);
         label->SetTextSize(80);
 

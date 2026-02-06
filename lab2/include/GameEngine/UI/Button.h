@@ -10,6 +10,7 @@ public:
     Button(const std::string &id, const Vector2 &pos, const Vector2 &size, const std::string &text = "")
         : UIElement(id, pos, size, UIConfig::DEFAULT_BUTTON_FONT_SIZE)
     {
+        tag_ = kUIButton;
         SetText(text);
     }
 

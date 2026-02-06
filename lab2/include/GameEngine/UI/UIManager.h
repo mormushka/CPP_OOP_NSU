@@ -20,11 +20,11 @@
 class UIManager : public Subject<Event>
 {
 private:
-    std::unordered_map<std::string, std::unordered_map<std::string, std::unique_ptr<UIElement>>> sceneElements_;
+    std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<UIElement>>> sceneElements_;
     std::string activeScene_;
     std::string defaultFontPath_ = UIConfig::DEFAULT_FONT_PATH;
-    UIElement *hoveredElement_ = nullptr;
-    UIElement *pressedElement_ = nullptr;
+    std::shared_ptr<UIElement> hoveredElement_;
+    std::shared_ptr<UIElement> pressedElement_;
 
 public:
     UIManager() = default;
@@ -42,34 +42,32 @@ public:
     }
 
     template <typename T>
-    T *CreateElement(const std::string &sceneName,
+    std::shared_ptr<T> CreateElement(const std::string &sceneName,
                      const std::string &id,
                      const Vector2 &pos,
                      const Vector2 &size,
                      const std::string &text = "")
     {
-        auto element = std::make_unique<T>(id, pos, size, text);
+        auto element = std::make_shared<T>(id, pos, size, text);
         element->SetFont(defaultFontPath_);
-        T *ptr = element.get();
-        sceneElements_[sceneName][id] = std::move(element);
+        sceneElements_[sceneName][id] = element;
         LOG_INFO << "CREATE UI ELEMENT on " + sceneName + ", id: " + id;
-        return ptr;
+        return element;
     }
 
-    Slider *CreateSlider(const std::string &sceneName,
+    std::shared_ptr<Slider> CreateSlider(const std::string &sceneName,
                          const std::string &id,
                          const Vector2 &pos,
                          const Vector2 &size,
                          const std::string &text,
                          float initVal)
     {
-        auto element = std::make_unique<Slider>(id, pos, size, initVal);
+        auto element = std::make_shared<Slider>(id, pos, size, initVal);
         element->SetFont(defaultFontPath_);
         element->SetText(text);
-        auto *ptr = element.get();
-        sceneElements_[sceneName][id] = std::move(element);
+        sceneElements_[sceneName][id] = element;
         LOG_INFO << "CREATE UI ELEMENT on " + sceneName + ", id: " + id;
-        return ptr;
+        return element;
     }
 
     void UpdateLayout(IRenderer &renderer)
@@ -125,7 +123,7 @@ public:
 private:
     void HandleMouseMove(const Vector2 &mousePos)
     {
-        Slider *draggingSlider = GetDraggingSlider();
+        std::shared_ptr<Slider> draggingSlider = GetDraggingSlider();
         if (draggingSlider && draggingSlider->IsDragging())
         {
             float oldValue = draggingSlider->GetValue();
@@ -139,12 +137,12 @@ private:
             return;
         }
 
-        UIElement *newHovered = nullptr;
+        std::shared_ptr<UIElement> newHovered;
         for (auto &[id, element] : sceneElements_[activeScene_])
         {
             if (element->IsVisible() && element->IsPointInside(mousePos))
             {
-                newHovered = element.get();
+                newHovered = element;
                 break;
             }
         }
@@ -171,8 +169,9 @@ private:
             hoveredElement_->OnPress();
             pressedElement_ = hoveredElement_;
 
-            if (auto *slider = dynamic_cast<Slider *>(hoveredElement_))
+            if (hoveredElement_->GetTag() == kUISlider)
             {
+                auto slider = std::static_pointer_cast<Slider>(hoveredElement_);
                 float oldValue = slider->GetValue();
                 slider->UpdateValueFromMousePos(p);
 
@@ -201,12 +200,8 @@ private:
         }
     }
 
-    Slider *GetDraggingSlider()
+    std::shared_ptr<Slider> GetDraggingSlider()
     {
-        if (pressedElement_)
-        {
-            return dynamic_cast<Slider *>(pressedElement_);
-        }
-        return nullptr;
+        return std::static_pointer_cast<Slider>(pressedElement_);
     }
 };

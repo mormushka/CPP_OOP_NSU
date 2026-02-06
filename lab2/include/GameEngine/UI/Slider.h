@@ -24,6 +24,7 @@ public:
         : UIElement(id, pos, size, UIConfig::DEFAULT_SLIDER_FONT_SIZE),
           currentValue_(initialValue)
     {
+        tag_ = kUISlider;
         SetBackgroundColor(UIConfig::TRANSPARENT);
         SetTextColor(UIConfig::SLIDER_TEXT_COLOR);
     }

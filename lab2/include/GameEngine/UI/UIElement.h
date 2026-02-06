@@ -2,9 +2,18 @@
 #include "IRenderer.h"
 #include "UIConfig.h"
 
+enum UITag
+{
+    kUINone,
+    kUILabel,
+    kUIButton,
+    kUISlider
+};
+
 class UIElement
 {
 protected:
+    int tag_ = kUINone;
     std::string id_;
     Vector2 relativePosition_;
     Vector2 relativeSize_;
@@ -32,7 +41,7 @@ public:
 
     const std::string &GetId() const { return id_; }
 
-    void CalculateAbsoluteCoords(const Vector2& screenSize)
+    void CalculateAbsoluteCoords(const Vector2 &screenSize)
     {
         absolutePosition_.x = relativePosition_.x * screenSize.x;
         absolutePosition_.y = relativePosition_.y * screenSize.y;
@@ -45,7 +54,7 @@ public:
         if (!isVisible_)
             return;
         Color bg = isPressed_ ? UIConfig::PRESSED_COLOR : isHovered_ ? UIConfig::HOVER_COLOR
-                                                                            : backgroundColor_;
+                                                                     : backgroundColor_;
         renderer.DrawRectangle(absolutePosition_, absoluteSize_, bg, UIConfig::THUMB_BORDER_RADIUS);
     }
 
@@ -75,6 +84,7 @@ public:
     const Vector2 &GetAbsoluteSize() const { return absoluteSize_; }
     const std::string &GetText() const { return text_; }
     const Color &GetTextColor() const { return textColor_; }
+    const int &GetTag() const { return tag_; }
     bool IsVisible() const { return isVisible_; }
     bool IsHovered() const { return isHovered_; }
     bool IsPressed() const { return isPressed_; }

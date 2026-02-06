@@ -10,6 +10,7 @@ public:
     Label(const std::string &id, const Vector2 &pos, const Vector2 &size, const std::string &text = "")
         : UIElement(id, pos, size, UIConfig::DEFAULT_LABEL_FONT_SIZE)
     {
+        tag_ = kUILabel;
         SetBackgroundColor(UIConfig::TRANSPARENT);
         SetText(text);
     }

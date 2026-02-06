@@ -30,8 +30,8 @@ private:
     float gameOverCooldown_;
     const float kGameOverCooldown_ = 3.f;
 
-    Label *labelScore_;
-    Label *labelLives_;
+    std::shared_ptr<Label> labelScore_;
+    std::shared_ptr<Label> labelLives_;
 
 public:
     GameSceneImpl(std::string sceneName,
