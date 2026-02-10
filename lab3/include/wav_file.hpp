@@ -6,6 +6,8 @@
 #include <memory>
 #include <vector>
 
+#include "exceptions.hpp"
+
 namespace WavFile
 {
     struct Header
@@ -28,17 +30,60 @@ namespace WavFile
         std::uint32_t dataChunkSize;
     };
 
+    enum class Options
+    {
+        in,
+        out,
+        empty,
+    };
+
     class File
     {
     private:
         std::unique_ptr<Header> header_;
         std::string filename_;
+        std::ifstream file_;
+        Options option_;
 
     public:
         std::vector<int16_t> samples_;
 
-        File(const std::string &filename, std::unique_ptr<Header> &header)
-            : filename_(filename), header_(std::move(header)) {}
+        File() {}
+
+        void OpenFile(const std::string &filename, Options option)
+        {
+            filename_ = filename;
+            option_ = option;
+            if (option_ == Options::in)
+            {
+                file_.open(filename_, std::ios::in | std::ios::binary);
+            }
+            else
+            {
+                file_.open(filename_, std::ios::out | std::ios::binary);
+            }
+
+            if (!file_.is_open())
+                throw Exceptions::FileOpenException(filename);
+        }
+
+        std::ifstream &GetFileStream()
+        {
+            return file_;
+        }
+
+        void CloseFile()
+        {
+            file_.close();
+        }
+
+        void SetHeader(std::unique_ptr<Header> &header)
+        {
+            header_ = std::move(header);
+
+            if (!IsSupportedFormat())
+                throw Exceptions::InvalidFormatException();
+        }
 
         bool IsSupportedFormat() const
         {

@@ -18,38 +18,42 @@ public:
 
 std::shared_ptr<WavFile::File> WavReader::Read(const std::string &filename)
 {
-    std::ifstream file(filename, std::ios::binary);
+    auto wavFile = std::make_shared<WavFile::File>();
 
-    if (!file.is_open())
+    try
     {
-        throw Exceptions::FileOpenException(filename);
+        wavFile->OpenFile(filename, WavFile::Options::in);
+    }
+    catch (const Exceptions::Exception &e)
+    {
+        throw e;
     }
 
     auto header = std::make_unique<WavFile::Header>();
-    file.read(reinterpret_cast<char *>(header.get()), sizeof(WavFile::Header));
+    wavFile->GetFileStream().read(reinterpret_cast<char *>(header.get()), sizeof(WavFile::Header));
 
-    if (!file)
-    {
+    if (!wavFile->GetFileStream())
         throw Exceptions::ReadException();
-    }
 
     while (std::string(header->data, 4) != "data")
     {
-        file.seekg(header->dataChunkSize, std::ios::cur);
+        wavFile->GetFileStream().seekg(header->dataChunkSize, std::ios::cur);
 
-        file.read(header->data, 4);
-        file.read(reinterpret_cast<char *>(&header->dataChunkSize), 4);
+        wavFile->GetFileStream().read(header->data, 4);
+        wavFile->GetFileStream().read(reinterpret_cast<char *>(&header->dataChunkSize), 4);
 
-        if (!file)
-        {
+        if (!wavFile->GetFileStream())
             throw Exceptions::ReadException();
-        }
     }
-
-    auto wavFile = std::make_shared<WavFile::File>(filename, header);
-
-    if (!wavFile->IsSupportedFormat())
-        throw Exceptions::InvalidFormatException();
+    
+    try
+    {
+        wavFile->SetHeader(header);
+    }
+    catch (const Exceptions::Exception &e)
+    {
+        throw e;
+    }
 
     std::uint32_t numSamples = wavFile->GetNumSamples();
     wavFile->samples_.resize(numSamples);
@@ -57,9 +61,9 @@ std::shared_ptr<WavFile::File> WavReader::Read(const std::string &filename)
     for (std::uint32_t i = 0; i < numSamples; ++i)
     {
         int16_t sample;
-        file.read(reinterpret_cast<char *>(&sample), sizeof(sample));
+        wavFile->GetFileStream().read(reinterpret_cast<char *>(&sample), sizeof(sample));
 
-        if (!file)
+        if (!wavFile->GetFileStream())
         {
             wavFile->samples_.resize(i);
             std::cerr << "Warning" << std::endl;
@@ -68,8 +72,6 @@ std::shared_ptr<WavFile::File> WavReader::Read(const std::string &filename)
 
         wavFile->samples_[i] = sample;
     }
-
-    file.close();
 
     return wavFile;
 }
