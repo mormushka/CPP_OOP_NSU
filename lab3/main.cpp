@@ -3,6 +3,7 @@
 
 #include <CLI11.hpp>
 
+#include "wav_file.hpp"
 #include "wav_reader.hpp"
 #include "exceptions.hpp"
 
@@ -29,19 +30,19 @@ int main(int argc, char *argv[])
 
     try
     {
-        WavReader reader(inputs[0]);
-        reader.Read();
+        WavReader reader;
+        auto wavFile = reader.Read(inputs[0]);
 
-        const auto &header = reader.GetHeader();
-        const auto &samples = reader.GetSamples();
+        const auto header = wavFile->GetHeaderTEST();
+        const auto &samples = wavFile->GetSamples();
 
-        std::cout << "File: " << reader.GetFilename() << std::endl
-                  << "Duration: " << reader.GetDuration() << " seconds" << std::endl
-                  << "Sample rate: " << header.sampleRate << " Hz" << std::endl
-                  << "Channels: " << header.numChannels << std::endl
-                  << "Bits per sample: " << header.bitsPerSample << std::endl
+        std::cout << "File: " << wavFile->GetFilename() << std::endl
+                  << "Duration: " << wavFile->GetDuration() << " seconds" << std::endl
+                  << "Sample rate: " << header->sampleRate << " Hz" << std::endl
+                  << "Channels: " << header->numChannels << std::endl
+                  << "Bits per sample: " << header->bitsPerSample << std::endl
                   << "Number of samples: " << samples.size() << std::endl
-                  << "Data size: " << header.subchunk2Size << " bytes" << std::endl;
+                  << "Data size: " << header->dataChunkSize << " bytes" << std::endl;
 
         std::cout << "\nFirst 10 samples:" << std::endl;
         for (size_t i = 0; i < std::min(samples.size(), size_t(10)); ++i)
