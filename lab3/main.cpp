@@ -31,23 +31,30 @@ int main(int argc, char *argv[])
     try
     {
         WavReader reader;
-        auto wavFile = reader.Read(inputs[0]);
+        auto wavFile = reader.ReadHeader(inputs[0]);
 
         const auto header = wavFile->GetHeaderTEST();
-        const auto &samples = wavFile->GetSamples();
 
         std::cout << "File: " << wavFile->GetFilename() << std::endl
                   << "Duration: " << wavFile->GetDuration() << " seconds" << std::endl
                   << "Sample rate: " << header->sampleRate << " Hz" << std::endl
                   << "Channels: " << header->numChannels << std::endl
                   << "Bits per sample: " << header->bitsPerSample << std::endl
-                  << "Number of samples: " << samples.size() << std::endl
+                  << "Number of samples: " << wavFile->GetNumSamples() << std::endl
                   << "Data size: " << header->dataChunkSize << " bytes" << std::endl;
 
         std::cout << "\nFirst 10 samples:" << std::endl;
-        for (size_t i = 0; i < std::min(samples.size(), size_t(10)); ++i)
+        size_t i = 0;
+        for (auto &s : reader.ReadSamplesChunk(wavFile, 10000))
         {
-            std::cout << "Sample " << i << ": " << samples[i] << std::endl;
+            std::cout << "Sample " << ++i << ": " << s << std::endl;
+
+            if (i % 100 == 0)
+            {
+                std::cout << "Press Enter to continue...";
+                std::string dumb;
+                std::getline(std::cin, dumb);
+            }
         }
     }
     catch (const Exceptions::Exception &e)

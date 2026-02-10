@@ -13,10 +13,39 @@
 class WavReader
 {
 public:
-    std::shared_ptr<WavFile::File> Read(const std::string &filename);
+    std::shared_ptr<WavFile::File> ReadHeader(const std::string &filename);
+    std::vector<int16_t> ReadSamplesChunk(
+        std::shared_ptr<WavFile::File> const f,
+        std::size_t chunk_size);
 };
 
-std::shared_ptr<WavFile::File> WavReader::Read(const std::string &filename)
+std::vector<int16_t> WavReader::ReadSamplesChunk(
+    std::shared_ptr<WavFile::File> const f,
+    std::size_t chunk_size)
+{
+    std::vector<int16_t> chunk;
+
+    if (f->GetFileStream().eof())
+        return chunk;
+
+    std::size_t samples_left = f->GetNumSamples() - f->GetCurrentPosition();
+    std::size_t samples_to_read = std::min(chunk_size, samples_left);
+
+    if (samples_to_read == 0)
+        return chunk;
+
+    chunk.resize(samples_to_read);
+
+    f->GetFileStream().read(reinterpret_cast<char *>(chunk.data()),
+               samples_to_read * sizeof(int16_t));
+
+    if (!f->GetFileStream())
+        throw Exceptions::ReadException();
+
+    return chunk;
+}
+
+std::shared_ptr<WavFile::File> WavReader::ReadHeader(const std::string &filename)
 {
     auto wavFile = std::make_shared<WavFile::File>();
 
@@ -45,7 +74,9 @@ std::shared_ptr<WavFile::File> WavReader::Read(const std::string &filename)
         if (!wavFile->GetFileStream())
             throw Exceptions::ReadException();
     }
-    
+
+    wavFile->SetDataStartPos(wavFile->GetFileStream().tellg());
+
     try
     {
         wavFile->SetHeader(header);
@@ -53,24 +84,6 @@ std::shared_ptr<WavFile::File> WavReader::Read(const std::string &filename)
     catch (const Exceptions::Exception &e)
     {
         throw e;
-    }
-
-    std::uint32_t numSamples = wavFile->GetNumSamples();
-    wavFile->samples_.resize(numSamples);
-
-    for (std::uint32_t i = 0; i < numSamples; ++i)
-    {
-        int16_t sample;
-        wavFile->GetFileStream().read(reinterpret_cast<char *>(&sample), sizeof(sample));
-
-        if (!wavFile->GetFileStream())
-        {
-            wavFile->samples_.resize(i);
-            std::cerr << "Warning" << std::endl;
-            break;
-        }
-
-        wavFile->samples_[i] = sample;
     }
 
     return wavFile;

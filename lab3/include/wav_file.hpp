@@ -44,10 +44,9 @@ namespace WavFile
         std::string filename_;
         std::ifstream file_;
         Options option_;
+        std::streampos dataStartPos_;
 
     public:
-        std::vector<int16_t> samples_;
-
         File() {}
 
         void OpenFile(const std::string &filename, Options option)
@@ -74,15 +73,30 @@ namespace WavFile
 
         void CloseFile()
         {
-            file_.close();
+            if (file_.is_open())
+                file_.close();
         }
 
         void SetHeader(std::unique_ptr<Header> &header)
         {
             header_ = std::move(header);
-
             if (!IsSupportedFormat())
                 throw Exceptions::InvalidFormatException();
+        }
+
+        void SetDataStartPos(const std::streampos &dataStartPos)
+        {
+            dataStartPos_ = dataStartPos;
+        }
+
+        const std::streampos &GetDataStartPos() const
+        {
+            return dataStartPos_;
+        }
+
+        std::size_t GetCurrentPosition()
+        {
+            return static_cast<std::size_t>(file_.tellg() - dataStartPos_) / sizeof(int16_t);
         }
 
         bool IsSupportedFormat() const
@@ -107,11 +121,9 @@ namespace WavFile
             return header_->dataChunkSize / (header_->bitsPerSample / 8);
         }
 
-        const std::vector<int16_t> &GetSamples() const { return samples_; }
-
         float GetDuration() const
         {
-            return static_cast<float>(samples_.size()) / header_->sampleRate;
+            return static_cast<float>(GetNumSamples()) / header_->sampleRate;
         }
 
         const std::string &GetFilename() const { return filename_; }
