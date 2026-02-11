@@ -46,15 +46,19 @@ int main(int argc, char *argv[])
         outFile.write(reinterpret_cast<char *>(loadedFiles[0]->GetHeaderTEST()), sizeof(WavFile::Header));
         //
 
-        Converters::MuteConverter mc;
-        mc.SetParameters({"0", "3"});
+        auto cFactory = Converters::Factory::Instance();
+        std::vector<std::unique_ptr<Converters::IConverter>> converters;
+        converters.push_back(cFactory.CreateConverter("mute"));
+        converters[0]->SetParameters({"2", "5"});
 
         size_t maxSec = loadedFiles[0]->GetDuration();
         for (size_t i = 0; i < maxSec; i++)
         {
             auto currentSample = reader.ReadNextSeconds(loadedFiles[0], 1);
-            mc.Process(currentSample, i);
-
+            for (auto &c : converters)
+            {
+                c->Process(currentSample, i);
+            }
             outFile.write(reinterpret_cast<char *>(currentSample.data()),
                           currentSample.size() * sizeof(int16_t));
         }

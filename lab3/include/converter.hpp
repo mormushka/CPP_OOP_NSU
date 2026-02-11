@@ -22,7 +22,7 @@ namespace Converters
         virtual std::string GetDescription() const = 0;
     };
 
-    class MuteConverter : public IConverter
+    class Mute : public IConverter
     {
     private:
         std::size_t startTime_;
@@ -60,14 +60,14 @@ namespace Converters
         }
     };
 
-    class MixConverter : public IConverter
+    class Mix : public IConverter
     {
     private:
-        std::vector<int16_t> &additionalSamples_;
+        std::shared_ptr<std::vector<int16_t>> additionalSamples_;
         std::size_t startTime_;
 
     public:
-        void SetAdditionalSamples(const std::vector<int16_t> &samples)
+        void SetAdditionalSamples(std::shared_ptr<std::vector<int16_t>> samples)
         {
             additionalSamples_ = samples;
         }
@@ -77,12 +77,12 @@ namespace Converters
             if (currentSecond < startTime_)
                 return;
 
-            size_t minSize = std::min<size_t>(mutableSamples.size(), additionalSamples_.size());
+            size_t minSize = std::min<size_t>(mutableSamples.size(), additionalSamples_->size());
 
             for (size_t i = 0; i < minSize; i++)
             {
                 int32_t mixed = static_cast<int32_t>(mutableSamples[i]) +
-                                static_cast<int32_t>(additionalSamples_[i]);
+                                static_cast<int32_t>((*additionalSamples_)[i]);
                 mixed /= 2;
 
                 if (mixed > INT16_MAX)
@@ -109,6 +109,45 @@ namespace Converters
         std::string GetDescription() const override
         {
             return "22";
+        }
+    };
+}
+
+namespace Converters
+{
+    class Factory
+    {
+    private:
+        std::map<std::string, std::function<std::unique_ptr<IConverter>()>> creators_;
+
+        Factory()
+        {
+            RegisterConverters();
+        }
+
+        void RegisterConverters()
+        {
+            creators_["mute"] = []()
+            { return std::make_unique<Mute>(); };
+            creators_["mix"] = []()
+            { return std::make_unique<Mix>(); };
+        }
+
+    public:
+        static Factory &Instance()
+        {
+            static Factory instance;
+            return instance;
+        }
+        
+        std::unique_ptr<IConverter> CreateConverter(const std::string &name)
+        {
+            auto it = creators_.find(name);
+            if (it != creators_.end())
+            {
+                return it->second();
+            }
+            return nullptr;
         }
     };
 }
