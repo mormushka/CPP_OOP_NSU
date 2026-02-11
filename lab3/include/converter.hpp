@@ -31,7 +31,7 @@ namespace Converters
     public:
         void Process(std::vector<int16_t> &input, const std::size_t &currentSecond) override
         {
-            if (currentSecond >= startTime_ && currentSecond <= endTime_)
+            if (currentSecond > startTime_ && currentSecond < endTime_)
                 for (auto &i : input)
                     i = 0;
         }
