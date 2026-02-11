@@ -43,18 +43,18 @@ int main(int argc, char *argv[])
                   << "Number of samples: " << wavFile->GetNumSamples() << std::endl
                   << "Data size: " << header->dataChunkSize << " bytes" << std::endl;
 
-        std::cout << "\nFirst 10 samples:" << std::endl;
-        size_t i = 0;
-        for (auto &s : reader.ReadSamplesChunk(wavFile, 10000))
+        std::cout << "\nSamples:" << std::endl;
+        size_t c = 0;
+        for (size_t i = 0; i < wavFile->GetDuration(); i++)
         {
-            std::cout << "Sample " << ++i << ": " << s << std::endl;
-
-            if (i % 100 == 0)
+            std::cout << "---SECOND--- " << i << std::endl;
+            for (auto &s : reader.ReadNextSeconds(wavFile, 1))
             {
-                std::cout << "Press Enter to continue...";
-                std::string dumb;
-                std::getline(std::cin, dumb);
+                std::cout << "Sample " << ++c << ": " << s << std::endl;
             }
+            std::cout << "Press Enter to continue...";
+            std::string dumb;
+            std::getline(std::cin, dumb);
         }
     }
     catch (const Exceptions::Exception &e)

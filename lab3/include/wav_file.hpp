@@ -84,6 +84,11 @@ namespace WavFile
                 throw Exceptions::InvalidFormatException();
         }
 
+        std::uint16_t SampleRate() const
+        {
+            return header_->sampleRate;
+        }
+
         void SetDataStartPos(const std::streampos &dataStartPos)
         {
             dataStartPos_ = dataStartPos;

@@ -14,10 +14,22 @@ class WavReader
 {
 public:
     std::shared_ptr<WavFile::File> ReadHeader(const std::string &filename);
+
     std::vector<int16_t> ReadSamplesChunk(
         std::shared_ptr<WavFile::File> const f,
         std::size_t chunk_size);
+
+    std::vector<int16_t> ReadNextSeconds(
+        std::shared_ptr<WavFile::File> const f,
+        std::size_t seconds);
 };
+
+std::vector<int16_t> WavReader::ReadNextSeconds(
+    std::shared_ptr<WavFile::File> const f,
+    std::size_t seconds)
+{
+    return ReadSamplesChunk(f, seconds * f->SampleRate());
+}
 
 std::vector<int16_t> WavReader::ReadSamplesChunk(
     std::shared_ptr<WavFile::File> const f,
@@ -37,7 +49,7 @@ std::vector<int16_t> WavReader::ReadSamplesChunk(
     chunk.resize(samples_to_read);
 
     f->GetFileStream().read(reinterpret_cast<char *>(chunk.data()),
-               samples_to_read * sizeof(int16_t));
+                            samples_to_read * sizeof(int16_t));
 
     if (!f->GetFileStream())
         throw Exceptions::ReadException();
