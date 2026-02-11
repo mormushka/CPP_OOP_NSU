@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
         //
 
         Converters::MuteConverter mc;
-        mc.SetParameters({"5", "10"});
+        mc.SetParameters({"0", "3"});
 
         size_t maxSec = loadedFiles[0]->GetDuration();
         for (size_t i = 0; i < maxSec; i++)
