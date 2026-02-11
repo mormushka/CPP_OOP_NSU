@@ -6,6 +6,7 @@
 #include "wav_file.hpp"
 #include "wav_reader.hpp"
 #include "exceptions.hpp"
+#include "converter.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -31,8 +32,40 @@ int main(int argc, char *argv[])
     try
     {
         WavReader reader;
-        auto wavFile = reader.ReadHeader(inputs[0]);
+        std::vector<std::shared_ptr<WavFile::File>> loadedFiles;
 
+        for (size_t i = 0; i < inputs.size(); ++i)
+            loadedFiles.push_back(reader.ReadHeader(inputs[i]));
+
+        //
+        std::ofstream outFile(output, std::ios::binary);
+        if (!outFile.is_open())
+        {
+            throw Exceptions::FileOpenException(output);
+        }
+        outFile.write(reinterpret_cast<char *>(loadedFiles[0]->GetHeaderTEST()), sizeof(WavFile::Header));
+        //
+
+        Converters::MuteConverter mc;
+        mc.SetParameters({"5", "10"});
+
+        size_t maxSec = loadedFiles[0]->GetDuration();
+        for (size_t i = 0; i < maxSec; i++)
+        {
+            auto currentSample = reader.ReadNextSeconds(loadedFiles[0], 1);
+            mc.Process(currentSample, i);
+
+            outFile.write(reinterpret_cast<char *>(currentSample.data()),
+                          currentSample.size() * sizeof(int16_t));
+        }
+
+        outFile.close();
+
+        std::cout << "Processing completed successfully!\n";
+
+        /*
+        WavReader reader;
+        auto wavFile = reader.ReadHeader(inputs[0]);
         const auto header = wavFile->GetHeaderTEST();
 
         std::cout << "File: " << wavFile->GetFilename() << std::endl
@@ -56,6 +89,7 @@ int main(int argc, char *argv[])
             std::string dumb;
             std::getline(std::cin, dumb);
         }
+        */
     }
     catch (const Exceptions::Exception &e)
     {

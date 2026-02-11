@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "exceptions.hpp"
+#include "consts.hpp"
 
 namespace WavFile
 {
@@ -28,13 +29,6 @@ namespace WavFile
 
         char data[4];
         std::uint32_t dataChunkSize;
-    };
-
-    enum class Options
-    {
-        in,
-        out,
-        empty,
     };
 
     class File
@@ -84,11 +78,6 @@ namespace WavFile
                 throw Exceptions::InvalidFormatException();
         }
 
-        std::uint16_t SampleRate() const
-        {
-            return header_->sampleRate;
-        }
-
         void SetDataStartPos(const std::streampos &dataStartPos)
         {
             dataStartPos_ = dataStartPos;
@@ -106,14 +95,14 @@ namespace WavFile
 
         bool IsSupportedFormat() const
         {
-            return (std::string(header_->riff, 4) == "RIFF" &&
-                    std::string(header_->wave, 4) == "WAVE" &&
-                    std::string(header_->fmt, 4) == "fmt " &&
-                    header_->audioFormat == 1 &&
-                    header_->numChannels == 1 &&
-                    header_->sampleRate == 44100 &&
-                    header_->bitsPerSample == 16 &&
-                    header_->fmtChunkSize == 16);
+            return (std::string(header_->riff, 4) == kRiff &&
+                    std::string(header_->wave, 4) == kWave &&
+                    std::string(header_->fmt, 4) == kFmt &&
+                    header_->audioFormat == kAudioFormat &&
+                    header_->numChannels == kNumChannels &&
+                    header_->sampleRate == kSampleRate &&
+                    header_->bitsPerSample == kBitsPerSample &&
+                    header_->fmtChunkSize == kFmtChunkSize);
         }
 
         Header *GetHeaderTEST()
@@ -123,12 +112,12 @@ namespace WavFile
 
         std::uint32_t GetNumSamples() const
         {
-            return header_->dataChunkSize / (header_->bitsPerSample / 8);
+            return header_->dataChunkSize / (kBitsPerSample / 8);
         }
 
         float GetDuration() const
         {
-            return static_cast<float>(GetNumSamples()) / header_->sampleRate;
+            return static_cast<float>(GetNumSamples()) / kSampleRate;
         }
 
         const std::string &GetFilename() const { return filename_; }

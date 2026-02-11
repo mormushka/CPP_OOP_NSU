@@ -28,7 +28,7 @@ std::vector<int16_t> WavReader::ReadNextSeconds(
     std::shared_ptr<WavFile::File> const f,
     std::size_t seconds)
 {
-    return ReadSamplesChunk(f, seconds * f->SampleRate());
+    return ReadSamplesChunk(f, seconds * WavFile::kSampleRate);
 }
 
 std::vector<int16_t> WavReader::ReadSamplesChunk(
