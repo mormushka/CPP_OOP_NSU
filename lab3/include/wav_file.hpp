@@ -102,9 +102,9 @@ namespace WavFile
                     header_->fmtChunkSize == kFmtChunkSize);
         }
 
-        Header *GetHeaderRAW()
+        const std::unique_ptr<Header>& GetHeader() const
         {
-            return header_.get();
+            return header_;
         }
 
         std::uint32_t GetNumSamples() const

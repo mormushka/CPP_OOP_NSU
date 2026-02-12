@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
             throw Exceptions::FileOpenException(output_filename);
         }
 
-        outFile.write(reinterpret_cast<char *>(loadedFiles[0]->GetHeaderRAW()), sizeof(WavFile::Header));
+        outFile.write(reinterpret_cast<char *>(loadedFiles[0]->GetHeader().get()), sizeof(WavFile::Header));
 
         auto converters = ConfigParser::ParseConfigFile(config_filename, loadedFiles);
 
