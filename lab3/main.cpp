@@ -18,13 +18,13 @@ int main(int argc, char *argv[])
 
     app.footer(DescriptionGen::Footer());
 
-    std::string config;
-    std::string output;
-    std::vector<std::string> inputs;
+    std::string config_filename;
+    std::string output_filename;
+    std::vector<std::string> input_filenames;
 
-    app.add_option("-c,--config", config, "Config file")->required();
-    app.add_option("-o,--output", output, "Output file")->required();
-    app.add_option("-i,--inputs", inputs, "Input files")->required();
+    app.add_option("-c,--config", config_filename, "Config file")->required();
+    app.add_option("-o,--output", output_filename, "Output file")->required();
+    app.add_option("-i,--inputs", input_filenames, "Input files")->required();
 
     try
     {
@@ -40,16 +40,16 @@ int main(int argc, char *argv[])
         WavReader reader;
         std::vector<std::shared_ptr<WavFile::File>> loadedFiles;
 
-        for (size_t i = 0; i < inputs.size(); ++i)
-            loadedFiles.push_back(reader.ReadHeader(inputs[i]));
+        for (size_t i = 0; i < input_filenames.size(); ++i)
+            loadedFiles.push_back(reader.ReadHeader(input_filenames[i]));
 
-        std::ofstream outFile(output, std::ios::binary);
+        std::ofstream outFile(output_filename, std::ios::binary);
         if (!outFile.is_open())
-            throw Exceptions::FileOpenException(output);
+            throw Exceptions::FileOpenException(output_filename);
 
         outFile.write(reinterpret_cast<char *>(loadedFiles[0]->GetHeaderRAW()), sizeof(WavFile::Header));
 
-        auto converters = ConfigParser::ParseConfigFile(config, loadedFiles);
+        auto converters = ConfigParser::ParseConfigFile(config_filename, loadedFiles);
 
         size_t numFiles = loadedFiles.size();
         auto samples = std::make_shared<std::vector<std::vector<int16_t>>>(numFiles);
