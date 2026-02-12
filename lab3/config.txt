@@ -1,5 +1,6 @@
 # comment
-mute 38 48
+mute 10 1000
 # comment comment
-mix $1 15
-raise 0.3
+mix $2 15
+
+raise 0.5

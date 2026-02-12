@@ -57,10 +57,6 @@ int main(int argc, char *argv[])
 
         size_t numFiles = loadedFiles.size();
         auto samples = std::make_shared<std::vector<std::vector<int16_t>>>(numFiles);
-        for (auto &in_v : *samples)
-        {
-            in_v.resize(WavFile::kSampleRate);
-        }
 
         size_t maxSec = loadedFiles[0]->GetDuration();
         for (size_t sec = 0; sec < maxSec; sec++)
