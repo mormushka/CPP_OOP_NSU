@@ -16,4 +16,3 @@ namespace WavFile
     inline constexpr std::uint16_t kBitsPerSample = 16;
     inline const std::string kData = "data";
 }
-
