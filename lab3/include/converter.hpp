@@ -205,10 +205,9 @@ namespace Converters
 
         std::unique_ptr<IConverter> CreateConverter(const std::string &name)
         {
-            auto it = creators_.find(name);
-            if (it != creators_.end())
+            if (creators_.count(name))
             {
-                return it->second();
+                return creators_[name]();
             }
             return nullptr;
         }
@@ -216,9 +215,9 @@ namespace Converters
         std::vector<std::string> GetAvailableConverters() const
         {
             std::vector<std::string> names;
-            for (const auto &[name, creator] : creators_)
+            for (const auto &c : creators_)
             {
-                names.push_back(name);
+                names.push_back(c.first);
             }
             return names;
         }
