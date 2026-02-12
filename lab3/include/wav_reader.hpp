@@ -38,13 +38,17 @@ std::vector<int16_t> WavReader::ReadSamplesChunk(
     std::vector<int16_t> chunk;
 
     if (f->GetFileStream().eof())
+    {
         return chunk;
+    }
 
     std::size_t samples_left = f->GetNumSamples() - f->GetCurrentPosition();
     std::size_t samples_to_read = std::min(chunk_size, samples_left);
 
     if (samples_to_read == 0)
+    {
         return chunk;
+    }
 
     chunk.resize(samples_to_read);
 
@@ -52,7 +56,9 @@ std::vector<int16_t> WavReader::ReadSamplesChunk(
                             samples_to_read * sizeof(int16_t));
 
     if (!f->GetFileStream())
+    {
         throw Exceptions::WavReadException();
+    }
 
     return chunk;
 }
@@ -66,7 +72,9 @@ std::shared_ptr<WavFile::File> WavReader::ReadHeader(const std::string &filename
     auto header = std::make_unique<WavFile::Header>();
     f->GetFileStream().read(reinterpret_cast<char *>(header.get()), sizeof(WavFile::Header));
     if (!f->GetFileStream())
+    {
         throw Exceptions::WavReadException();
+    }
 
     while (std::string(header->data, 4) != "data")
     {
@@ -76,7 +84,9 @@ std::shared_ptr<WavFile::File> WavReader::ReadHeader(const std::string &filename
         f->GetFileStream().read(reinterpret_cast<char *>(&header->dataChunkSize), 4);
 
         if (!f->GetFileStream())
+        {
             throw Exceptions::WavReadException();
+        }
     }
 
     f->SetDataStartPos(f->GetFileStream().tellg());

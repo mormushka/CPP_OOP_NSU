@@ -26,7 +26,9 @@ namespace ConfigParser
             while (iss >> token)
             {
                 if (token.empty() || token[0] == '#')
+                {
                     break;
+                }
                 tokens.push_back(token);
             }
 
@@ -41,18 +43,22 @@ namespace ConfigParser
         std::string ExpandReference(const std::string &param)
         {
             if (param.empty() || param[0] != '$')
+            {
                 return param;
-
+            }
             try
             {
                 int stream_num = std::stoi(param.substr(1));
                 if (stream_num < 1)
+                {
                     throw Exceptions::InvalidArgument("Stream number must be positive");
-
+                }
                 if (static_cast<size_t>(stream_num - 1) >= loadedFiles_.size())
+                {
                     throw Exceptions::InvalidArgument("Stream reference $" + std::to_string(stream_num) +
                                                       " exceeds available input files (" +
                                                       std::to_string(loadedFiles_.size()) + ")");
+                }
 
                 return std::to_string(stream_num - 1);
             }
@@ -72,7 +78,9 @@ namespace ConfigParser
             std::ifstream configFile(configPath);
 
             if (!configFile.is_open())
+            {
                 throw Exceptions::FileOpenException(configPath);
+            }
 
             std::string line;
             int line_num = 0;
@@ -83,18 +91,24 @@ namespace ConfigParser
                 ++line_num;
 
                 if (IsCommentOrEmpty(line))
+                {
                     continue;
+                }
 
                 auto tokens = SplitLine(line);
                 if (tokens.empty())
+                {
                     continue;
+                }
 
                 std::string converter_name = tokens[0];
                 auto converter = factory.CreateConverter(converter_name);
 
                 if (!converter)
-                    throw  Exceptions::InvalidArgument("Unknown converter '" + converter_name +
-                                                "' at line " + std::to_string(line_num));
+                {
+                    throw Exceptions::InvalidArgument("Unknown converter '" + converter_name +
+                                                      "' at line " + std::to_string(line_num));
+                }
 
                 std::vector<std::string> params;
                 for (size_t i = 1; i < tokens.size(); ++i)
@@ -105,8 +119,8 @@ namespace ConfigParser
                     }
                     catch (const Exceptions::InvalidArgument &e)
                     {
-                        throw  Exceptions::InvalidArgument("Error at line " + std::to_string(line_num) +
-                                                    ": " + e.what());
+                        throw Exceptions::InvalidArgument("Error at line " + std::to_string(line_num) +
+                                                          ": " + e.what());
                     }
                 }
 
@@ -124,7 +138,9 @@ namespace ConfigParser
             }
 
             if (converters.empty())
+            {
                 throw Exceptions::Exception("No converters specified in config file");
+            }
 
             return converters;
         }

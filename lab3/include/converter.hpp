@@ -36,15 +36,20 @@ namespace Converters
                      const std::size_t &currentSecond) override
         {
             if (currentSecond >= startTime_ && currentSecond < endTime_)
-                for (auto &i : mutableSamples)
-                    i = 0;
+            {
+                for (auto &ms : mutableSamples)
+                {
+                    ms = 0;
+                }
+            }
         }
 
         void SetParameters(const std::vector<std::string> &params) override
         {
             if (params.size() != 2)
+            {
                 throw Exceptions::InvalidArgument("Invalid count arguments in converter " + GetName());
-
+            }
             startTime_ = std::stoul(params[0]);
             endTime_ = std::stoul(params[1]);
 
@@ -74,7 +79,9 @@ namespace Converters
                      const size_t &currentSecond) override
         {
             if (currentSecond < startTime_)
+            {
                 return;
+            }
 
             size_t minSize = std::min<size_t>(mutableSamples.size(),
                                               (*additionalSamples_)[addStreamInd_].size());
@@ -86,9 +93,13 @@ namespace Converters
                 mixed /= 2;
 
                 if (mixed > INT16_MAX)
+                {
                     mixed = INT16_MAX;
+                }
                 if (mixed < INT16_MIN)
+                {
                     mixed = INT16_MIN;
+                }
 
                 mutableSamples[i] = static_cast<int16_t>(mixed);
             }
@@ -127,9 +138,13 @@ namespace Converters
                 int32_t raised = static_cast<int32_t>(ms) * raise_;
 
                 if (raised > INT16_MAX)
+                {
                     raised = INT16_MAX;
+                }
                 if (raised < INT16_MIN)
+                {
                     raised = INT16_MIN;
+                }
 
                 ms = static_cast<int16_t>(raised);
             }

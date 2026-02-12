@@ -41,11 +41,15 @@ int main(int argc, char *argv[])
         std::vector<std::shared_ptr<WavFile::File>> loadedFiles;
 
         for (size_t i = 0; i < input_filenames.size(); ++i)
+        {
             loadedFiles.push_back(reader.ReadHeader(input_filenames[i]));
+        }
 
         std::ofstream outFile(output_filename, std::ios::binary);
         if (!outFile.is_open())
+        {
             throw Exceptions::FileOpenException(output_filename);
+        }
 
         outFile.write(reinterpret_cast<char *>(loadedFiles[0]->GetHeaderRAW()), sizeof(WavFile::Header));
 
@@ -54,18 +58,24 @@ int main(int argc, char *argv[])
         size_t numFiles = loadedFiles.size();
         auto samples = std::make_shared<std::vector<std::vector<int16_t>>>(numFiles);
         for (auto &in_v : *samples)
+        {
             in_v.resize(WavFile::kSampleRate);
+        }
 
         size_t maxSec = loadedFiles[0]->GetDuration();
         for (size_t sec = 0; sec < maxSec; sec++)
         {
             for (size_t f = 0; f < numFiles; f++)
+            {
                 (*samples)[f] = reader.ReadNextSeconds(loadedFiles[f], 1);
+            }
 
             auto outSample = (*samples)[0];
 
             for (auto &c : converters)
+            {
                 c->Process(outSample, samples, sec);
+            }
 
             outFile.write(reinterpret_cast<char *>(outSample.data()),
                           outSample.size() * sizeof(int16_t));

@@ -48,7 +48,9 @@ namespace WavFile
             file_.open(filename_, std::ios::in | std::ios::binary);
 
             if (!file_.is_open())
+            {
                 throw Exceptions::FileOpenException(filename);
+            }
         }
 
         std::ifstream &GetFileStream()
@@ -59,14 +61,18 @@ namespace WavFile
         void CloseFile()
         {
             if (file_.is_open())
+            {
                 file_.close();
+            }
         }
 
         void SetHeader(std::unique_ptr<Header> &header)
         {
             header_ = std::move(header);
             if (!IsSupportedFormat())
+            {
                 throw Exceptions::WavInvalidFormatException();
+            }
         }
 
         void SetDataStartPos(const std::streampos &dataStartPos)
@@ -111,6 +117,9 @@ namespace WavFile
             return static_cast<float>(GetNumSamples()) / kSampleRate;
         }
 
-        const std::string &GetFilename() const { return filename_; }
+        const std::string &GetFilename() const
+        {
+            return filename_;
+        }
     };
 }

@@ -17,12 +17,3 @@ namespace WavFile
     inline const std::string kData = "data";
 }
 
-namespace Converters
-{
-    
-}
-
-namespace ConfigParser
-{
-  
-}
