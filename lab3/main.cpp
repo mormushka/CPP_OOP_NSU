@@ -7,10 +7,16 @@
 #include "wav_reader.hpp"
 #include "exceptions.hpp"
 #include "converter.hpp"
+#include "config_parser.hpp"
+#include "description_gen.hpp"
 
 int main(int argc, char *argv[])
 {
-    CLI::App app{"options"};
+    CLI::App app{"sound processor"};
+
+    app.description(DescriptionGen::Description());
+
+    app.footer(DescriptionGen::Footer());
 
     std::string config;
     std::string output;
@@ -37,68 +43,42 @@ int main(int argc, char *argv[])
         for (size_t i = 0; i < inputs.size(); ++i)
             loadedFiles.push_back(reader.ReadHeader(inputs[i]));
 
-        //
         std::ofstream outFile(output, std::ios::binary);
         if (!outFile.is_open())
-        {
             throw Exceptions::FileOpenException(output);
-        }
-        outFile.write(reinterpret_cast<char *>(loadedFiles[0]->GetHeaderTEST()), sizeof(WavFile::Header));
-        //
 
-        auto cFactory = Converters::Factory::Instance();
-        std::vector<std::unique_ptr<Converters::IConverter>> converters;
-        converters.push_back(cFactory.CreateConverter("mute"));
-        converters[0]->SetParameters({"2", "5"});
+        outFile.write(reinterpret_cast<char *>(loadedFiles[0]->GetHeaderRAW()), sizeof(WavFile::Header));
+
+        auto converters = ConfigParser::ParseConfigFile(config, loadedFiles);
+
+        size_t numFiles = loadedFiles.size();
+        auto samples = std::make_shared<std::vector<std::vector<int16_t>>>(numFiles);
+        for (auto &in_v : *samples)
+            in_v.resize(WavFile::kSampleRate);
 
         size_t maxSec = loadedFiles[0]->GetDuration();
-        for (size_t i = 0; i < maxSec; i++)
+        for (size_t sec = 0; sec < maxSec; sec++)
         {
-            auto currentSample = reader.ReadNextSeconds(loadedFiles[0], 1);
+            for (size_t f = 0; f < numFiles; f++)
+                (*samples)[f] = reader.ReadNextSeconds(loadedFiles[f], 1);
+
+            auto outSample = (*samples)[0];
+
             for (auto &c : converters)
-            {
-                c->Process(currentSample, i);
-            }
-            outFile.write(reinterpret_cast<char *>(currentSample.data()),
-                          currentSample.size() * sizeof(int16_t));
+                c->Process(outSample, samples, sec);
+
+            outFile.write(reinterpret_cast<char *>(outSample.data()),
+                          outSample.size() * sizeof(int16_t));
         }
 
         outFile.close();
 
         std::cout << "Processing completed successfully!\n";
-
-        /*
-        WavReader reader;
-        auto wavFile = reader.ReadHeader(inputs[0]);
-        const auto header = wavFile->GetHeaderTEST();
-
-        std::cout << "File: " << wavFile->GetFilename() << std::endl
-                  << "Duration: " << wavFile->GetDuration() << " seconds" << std::endl
-                  << "Sample rate: " << header->sampleRate << " Hz" << std::endl
-                  << "Channels: " << header->numChannels << std::endl
-                  << "Bits per sample: " << header->bitsPerSample << std::endl
-                  << "Number of samples: " << wavFile->GetNumSamples() << std::endl
-                  << "Data size: " << header->dataChunkSize << " bytes" << std::endl;
-
-        std::cout << "\nSamples:" << std::endl;
-        size_t c = 0;
-        for (size_t i = 0; i < wavFile->GetDuration(); i++)
-        {
-            std::cout << "---SECOND--- " << i << std::endl;
-            for (auto &s : reader.ReadNextSeconds(wavFile, 1))
-            {
-                std::cout << "Sample " << ++c << ": " << s << std::endl;
-            }
-            std::cout << "Press Enter to continue...";
-            std::string dumb;
-            std::getline(std::cin, dumb);
-        }
-        */
     }
     catch (const Exceptions::Exception &e)
     {
         std::cerr << "Error: " << e.what() << std::endl;
-        return 1;
+        return e.Code();
     }
 
     return 0;

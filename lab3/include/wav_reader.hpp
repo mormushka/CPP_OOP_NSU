@@ -52,51 +52,36 @@ std::vector<int16_t> WavReader::ReadSamplesChunk(
                             samples_to_read * sizeof(int16_t));
 
     if (!f->GetFileStream())
-        throw Exceptions::ReadException();
+        throw Exceptions::WavReadException();
 
     return chunk;
 }
 
 std::shared_ptr<WavFile::File> WavReader::ReadHeader(const std::string &filename)
 {
-    auto wavFile = std::make_shared<WavFile::File>();
+    auto f = std::make_shared<WavFile::File>();
 
-    try
-    {
-        wavFile->OpenFile(filename, WavFile::Options::in);
-    }
-    catch (const Exceptions::Exception &e)
-    {
-        throw e;
-    }
+    f->OpenFile(filename);
 
     auto header = std::make_unique<WavFile::Header>();
-    wavFile->GetFileStream().read(reinterpret_cast<char *>(header.get()), sizeof(WavFile::Header));
-
-    if (!wavFile->GetFileStream())
-        throw Exceptions::ReadException();
+    f->GetFileStream().read(reinterpret_cast<char *>(header.get()), sizeof(WavFile::Header));
+    if (!f->GetFileStream())
+        throw Exceptions::WavReadException();
 
     while (std::string(header->data, 4) != "data")
     {
-        wavFile->GetFileStream().seekg(header->dataChunkSize, std::ios::cur);
+        f->GetFileStream().seekg(header->dataChunkSize, std::ios::cur);
 
-        wavFile->GetFileStream().read(header->data, 4);
-        wavFile->GetFileStream().read(reinterpret_cast<char *>(&header->dataChunkSize), 4);
+        f->GetFileStream().read(header->data, 4);
+        f->GetFileStream().read(reinterpret_cast<char *>(&header->dataChunkSize), 4);
 
-        if (!wavFile->GetFileStream())
-            throw Exceptions::ReadException();
+        if (!f->GetFileStream())
+            throw Exceptions::WavReadException();
     }
 
-    wavFile->SetDataStartPos(wavFile->GetFileStream().tellg());
+    f->SetDataStartPos(f->GetFileStream().tellg());
 
-    try
-    {
-        wavFile->SetHeader(header);
-    }
-    catch (const Exceptions::Exception &e)
-    {
-        throw e;
-    }
+    f->SetHeader(header);
 
-    return wavFile;
+    return f;
 }

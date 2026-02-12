@@ -1,2 +1,5 @@
-# Заглушить первые 30 секунд
-mute 0 30
+# comment
+mute 38 48
+# comment comment
+mix $1 15
+raise 0.3

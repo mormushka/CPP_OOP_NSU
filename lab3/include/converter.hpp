@@ -16,7 +16,9 @@ namespace Converters
     public:
         virtual ~IConverter() = default;
 
-        virtual void Process(std::vector<int16_t> &mutableSamples, const std::size_t &currentSecond) = 0;
+        virtual void Process(std::vector<int16_t> &mutableSamples,
+                             const std::shared_ptr<std::vector<std::vector<int16_t>>> additionalSamples_,
+                             const std::size_t &currentSecond) = 0;
         virtual void SetParameters(const std::vector<std::string> &params) = 0;
         virtual std::string GetName() const = 0;
         virtual std::string GetDescription() const = 0;
@@ -29,26 +31,26 @@ namespace Converters
         std::size_t endTime_;
 
     public:
-        void Process(std::vector<int16_t> &input, const std::size_t &currentSecond) override
+        void Process(std::vector<int16_t> &mutableSamples,
+                     const std::shared_ptr<std::vector<std::vector<int16_t>>> additionalSamples_,
+                     const std::size_t &currentSecond) override
         {
             if (currentSecond >= startTime_ && currentSecond < endTime_)
-                for (auto &i : input)
+                for (auto &i : mutableSamples)
                     i = 0;
         }
 
         void SetParameters(const std::vector<std::string> &params) override
         {
-            if (params.size() < 2)
-            {
-                throw std::invalid_argument("1");
-            }
+            if (params.size() != 2)
+                throw Exceptions::InvalidArgument("Invalid count arguments in converter " + GetName());
 
             startTime_ = std::stoul(params[0]);
             endTime_ = std::stoul(params[1]);
 
             if (startTime_ > endTime_)
             {
-                throw std::invalid_argument("1");
+                throw Exceptions::InvalidArgument("Invalid argument in converter " + GetName());
             }
         }
 
@@ -56,33 +58,31 @@ namespace Converters
 
         std::string GetDescription() const override
         {
-            return "11";
+            return "mute [start time(sec)] [end time(sec)]";
         }
     };
 
     class Mix : public IConverter
     {
     private:
-        std::shared_ptr<std::vector<int16_t>> additionalSamples_;
+        std::size_t addStreamInd_;
         std::size_t startTime_;
 
     public:
-        void SetAdditionalSamples(std::shared_ptr<std::vector<int16_t>> samples)
-        {
-            additionalSamples_ = samples;
-        }
-
-        void Process(std::vector<int16_t> &mutableSamples, const size_t &currentSecond) override
+        void Process(std::vector<int16_t> &mutableSamples,
+                     const std::shared_ptr<std::vector<std::vector<int16_t>>> additionalSamples_,
+                     const size_t &currentSecond) override
         {
             if (currentSecond < startTime_)
                 return;
 
-            size_t minSize = std::min<size_t>(mutableSamples.size(), additionalSamples_->size());
+            size_t minSize = std::min<size_t>(mutableSamples.size(),
+                                              (*additionalSamples_)[addStreamInd_].size());
 
             for (size_t i = 0; i < minSize; i++)
             {
                 int32_t mixed = static_cast<int32_t>(mutableSamples[i]) +
-                                static_cast<int32_t>((*additionalSamples_)[i]);
+                                static_cast<int32_t>((*additionalSamples_)[addStreamInd_][i]);
                 mixed /= 2;
 
                 if (mixed > INT16_MAX)
@@ -96,11 +96,11 @@ namespace Converters
 
         void SetParameters(const std::vector<std::string> &params) override
         {
-            if (params.size() < 2)
+            if (params.size() != 2)
             {
-                throw std::invalid_argument("2");
+                throw Exceptions::InvalidArgument("Invalid count arguments in converter " + GetName());
             }
-
+            addStreamInd_ = std::stoul(params[0]);
             startTime_ = std::stoul(params[1]);
         }
 
@@ -108,7 +108,53 @@ namespace Converters
 
         std::string GetDescription() const override
         {
-            return "22";
+            return "mix $[num file stream] [start time(sec)]";
+        }
+    };
+
+    class Raise : public IConverter
+    {
+    private:
+        float raise_;
+
+    public:
+        void Process(std::vector<int16_t> &mutableSamples,
+                     const std::shared_ptr<std::vector<std::vector<int16_t>>> additionalSamples_,
+                     const size_t &currentSecond) override
+        {
+            for (auto &ms : mutableSamples)
+            {
+                int32_t raised = static_cast<int32_t>(ms) * raise_;
+
+                if (raised > INT16_MAX)
+                    raised = INT16_MAX;
+                if (raised < INT16_MIN)
+                    raised = INT16_MIN;
+
+                ms = static_cast<int16_t>(raised);
+            }
+        }
+
+        void SetParameters(const std::vector<std::string> &params) override
+        {
+            if (params.size() != 1)
+            {
+                throw Exceptions::InvalidArgument("Invalid count arguments in converter " + GetName());
+            }
+
+            raise_ = std::stof(params[0]);
+
+            if (raise_ < 0)
+            {
+                throw Exceptions::InvalidArgument("Raise factor cannot be negative");
+            }
+        }
+
+        std::string GetName() const override { return "raise"; }
+
+        std::string GetDescription() const override
+        {
+            return "raise [raise]\nExample: raise 1.5 (increase volume by 50%)\n     raise 0.5 (decrease volume by 50%)";
         }
     };
 }
@@ -131,6 +177,8 @@ namespace Converters
             { return std::make_unique<Mute>(); };
             creators_["mix"] = []()
             { return std::make_unique<Mix>(); };
+            creators_["raise"] = []()
+            { return std::make_unique<Raise>(); };
         }
 
     public:
@@ -139,7 +187,7 @@ namespace Converters
             static Factory instance;
             return instance;
         }
-        
+
         std::unique_ptr<IConverter> CreateConverter(const std::string &name)
         {
             auto it = creators_.find(name);
@@ -148,6 +196,16 @@ namespace Converters
                 return it->second();
             }
             return nullptr;
+        }
+
+        std::vector<std::string> GetAvailableConverters() const
+        {
+            std::vector<std::string> names;
+            for (const auto &[name, creator] : creators_)
+            {
+                names.push_back(name);
+            }
+            return names;
         }
     };
 }

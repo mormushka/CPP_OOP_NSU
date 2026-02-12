@@ -37,24 +37,15 @@ namespace WavFile
         std::unique_ptr<Header> header_;
         std::string filename_;
         std::ifstream file_;
-        Options option_;
         std::streampos dataStartPos_;
 
     public:
-        File() {}
+        ~File() { CloseFile(); }
 
-        void OpenFile(const std::string &filename, Options option)
+        void OpenFile(const std::string &filename)
         {
             filename_ = filename;
-            option_ = option;
-            if (option_ == Options::in)
-            {
-                file_.open(filename_, std::ios::in | std::ios::binary);
-            }
-            else
-            {
-                file_.open(filename_, std::ios::out | std::ios::binary);
-            }
+            file_.open(filename_, std::ios::in | std::ios::binary);
 
             if (!file_.is_open())
                 throw Exceptions::FileOpenException(filename);
@@ -75,7 +66,7 @@ namespace WavFile
         {
             header_ = std::move(header);
             if (!IsSupportedFormat())
-                throw Exceptions::InvalidFormatException();
+                throw Exceptions::WavInvalidFormatException();
         }
 
         void SetDataStartPos(const std::streampos &dataStartPos)
@@ -105,7 +96,7 @@ namespace WavFile
                     header_->fmtChunkSize == kFmtChunkSize);
         }
 
-        Header *GetHeaderTEST()
+        Header *GetHeaderRAW()
         {
             return header_.get();
         }
