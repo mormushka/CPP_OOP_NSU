@@ -4,7 +4,16 @@ project(Asteroids)
 
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(SFML 2.6 COMPONENTS graphics window system audio REQUIRED)
+# find_package(SFML 2.6 COMPONENTS graphics window system audio REQUIRED)
+
+include(FetchContent)
+FetchContent_Declare(SFML
+    GIT_REPOSITORY https://github.com/SFML/SFML.git
+    GIT_TAG 2.6.x
+    GIT_SHALLOW ON
+    SYSTEM
+)
+FetchContent_MakeAvailable(SFML)
 
 set(SOURCE_FILES
     src/main.cpp
